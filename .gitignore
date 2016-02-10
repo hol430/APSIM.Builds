@@ -1,0 +1,7 @@
+*.user
+APSIM.Builds.Service/bin/
+APSIM.Builds.Service/obj/Debug/APSIM.Builds.Service.csproj.FileListAbsolute.txt
+APSIM.Builds.Service/obj/
+APSIM.Builds.Web/bin/
+APSIM.Builds.Web/obj/
+packages/
