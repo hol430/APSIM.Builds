@@ -5,3 +5,6 @@ APSIM.Builds.Service/obj/
 APSIM.Builds.Web/bin/
 APSIM.Builds.Web/obj/
 packages/
+*.suo
+APSIM.Builds.Portal/bin/
+APSIM.Builds.Portal/obj/

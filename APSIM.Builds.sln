@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APSIM.Builds.Service", "APSIM.Builds.Service\APSIM.Builds.Service.csproj", "{08D524F9-9000-4F0F-9F04-B8738736B300}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APSIM.Builds.Portal", "APSIM.Builds.Web\APSIM.Builds.Portal.csproj", "{EFEAED46-17C6-45C4-900C-8895A55BFF9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APSIM.Builds.Portal", "APSIM.Builds.Portal\APSIM.Builds.Portal.csproj", "{EFEAED46-17C6-45C4-900C-8895A55BFF9B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{08D524F9-9000-4F0F-9F04-B8738736B300} = {08D524F9-9000-4F0F-9F04-B8738736B300}
 	EndProjectSection
