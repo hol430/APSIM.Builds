@@ -80,7 +80,7 @@ namespace APSIM.Builds.Service
                             upgrade.issueNumber = buildIssueNumber;
                             upgrade.IssueTitle = (string)reader["IssueTitle"];
                             upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                            upgrade.ReleaseURL = @"http://bob.apsim.info/ApsimXFiles/" + buildIssueNumber + "/ApsimSetup.exe";
+                            upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
 
                             upgrades.Add(upgrade);
                         }
@@ -109,7 +109,7 @@ namespace APSIM.Builds.Service
                         if (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            url = @"http://bob.apsim.info/ApsimXFiles/" + buildIssueNumber + "/ApsimSetup.exe";
+                            url = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
                         }
                     }
                 }
@@ -142,52 +142,6 @@ namespace APSIM.Builds.Service
             }
 
             return resolvedDate;
-        }
-
-        /// <summary>
-        /// Add a upgrade registration into the database.
-        /// </summary>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="organisation"></param>
-        /// <param name="address1"></param>
-        /// <param name="address2"></param>
-        /// <param name="city"></param>
-        /// <param name="state"></param>
-        /// <param name="postcode"></param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        public void RegisterUpgrade(string firstName, string lastName, string organisation, string address1, string address2,
-                    string city, string state, string postcode, string country, string email, string product, 
-                    string ChangeDBPassword)
-        {
-            if (ChangeDBPassword == BuildsClassic.GetValidPassword())
-            {
-                string sql = "INSERT INTO Registrations (Date, FirstName, LastName, Organisation, Address1, Address2, City, State, Postcode, Country, Email, Product) " +
-                             "VALUES (@Date, @FirstName, @LastName, @Organisation, @Address1, @Address2, @City, @State, @Postcode, @Country, @Email, @Product)";
-
-                using (SqlConnection connection = BuildsClassic.Open("ProductRegistration"))
-                {
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        command.Parameters.Add(new SqlParameter("@Date", DateTime.Now));
-                        command.Parameters.Add(new SqlParameter("@FirstName", firstName));
-                        command.Parameters.Add(new SqlParameter("@LastName", lastName));
-                        command.Parameters.Add(new SqlParameter("@Organisation", organisation));
-                        command.Parameters.Add(new SqlParameter("@Address1", address1));
-                        command.Parameters.Add(new SqlParameter("@Address2", address2));
-                        command.Parameters.Add(new SqlParameter("@City", city));
-                        command.Parameters.Add(new SqlParameter("@State", state));
-                        command.Parameters.Add(new SqlParameter("@Postcode", postcode));
-                        command.Parameters.Add(new SqlParameter("@Country", country));
-                        command.Parameters.Add(new SqlParameter("@Email", email));
-                        command.Parameters.Add(new SqlParameter("@Product", product));
-                        command.ExecuteNonQuery();
-
-                    }
-                }
-            }
         }
 
         /// <summary>

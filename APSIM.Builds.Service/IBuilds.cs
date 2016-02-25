@@ -32,29 +32,6 @@ namespace APSIM.Builds.Service
         List<Upgrade> GetUpgradesSinceIssue(int issueID);
 
         /// <summary>
-        /// Add a upgrade registration into the database.
-        /// </summary>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="organisation"></param>
-        /// <param name="address1"></param>
-        /// <param name="address2"></param>
-        /// <param name="city"></param>
-        /// <param name="state"></param>
-        /// <param name="postcode"></param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        [OperationContract]
-        [WebGet(UriTemplate = "/RegisterUpgrade?firstName={firstName}&lastName={lastName}&organisation={organisation}" +
-                                               "&address1={address1}&address2={address2}&city={city}&state={state}&postcode={postcode}" +
-                                               "&country={country}&email={email}&product={product}" +
-                                               "&ChangeDBPassword={ChangeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void RegisterUpgrade(string firstName, string lastName, string organisation, string address1, string address2,
-                             string city, string state, string postcode, string country, string email, string product,
-                             string ChangeDBPassword);
-
-        /// <summary>
         /// Gets the URL of the latest version.
         /// </summary>
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>
