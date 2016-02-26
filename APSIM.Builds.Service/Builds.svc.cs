@@ -178,7 +178,7 @@ namespace APSIM.Builds.Service
             issueTitle = null;
 
             GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-            string token = File.ReadAllText(@"D:Websites\GitHubToken.txt");
+            string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
             github.Credentials = new Credentials(token);
             Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
             pullRequestTask.Wait();
