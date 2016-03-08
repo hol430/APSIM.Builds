@@ -96,26 +96,8 @@ namespace APSIM.Builds.Service
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>
         public string GetURLOfLatestVersion()
         {
-            string url = null;
-            string sql = "SELECT TOP 1 * FROM ApsimX " +
-                         " ORDER BY Date DESC";
-
-            using (SqlConnection connection = BuildsClassic.Open())
-            {
-                using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int buildIssueNumber = (int)reader["IssueNumber"];
-                            url = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-                        }
-                    }
-                }
-            }
-
-            return url;
+            Build latestBuild = GetLatestBuild();
+            return latestBuild.url;
         }
 
         /// <summary>
@@ -221,6 +203,77 @@ namespace APSIM.Builds.Service
                 }
             }
             return -1;
+        }
+
+        /// <summary>Get the latest build.</summary>
+        private static Build GetLatestBuild()
+        {
+            string sql = "SELECT TOP 1 * FROM ApsimX " +
+                         " ORDER BY Date DESC";
+
+            using (SqlConnection connection = BuildsClassic.Open())
+            {
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Build build = new Build();
+                            build.date = (DateTime)reader["Date"];
+                            build.pullRequestID = (int)reader["PullRequestID"]; ;
+                            build.issueNumber = (int)reader["IssueNumber"];
+                            build.issueTitle = (string)reader["IssueTitle"];
+                            build.url = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + build.issueNumber + ".exe";
+                            return build;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>Get latest documentation HTML.</summary>
+        public Stream GetDocumentationHTML()
+        {
+            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html; charset=utf-8";
+            string html = "<html><body>" + Environment.NewLine;
+            
+
+            Build latestBuild = GetLatestBuild();
+
+            html += "<h2>Documentation for build <a href=\"https://github.com/APSIMInitiative/ApsimX/issues/" + latestBuild.issueNumber + "\">" +
+                     latestBuild.issueNumber + "</a> " + latestBuild.date.ToLongDateString() + "</h2>";
+
+            string pattern = "*" + latestBuild.issueNumber + ".pdf";
+            foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles", pattern))
+            {
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
+                docURL = docURL.Replace('\\', '/');
+
+                string modelName = Path.GetFileNameWithoutExtension(file);
+                modelName = modelName.Replace(latestBuild.issueNumber.ToString(), "");
+                html += "<a href=\"" + docURL + "\">" + modelName + "</a><br/>" + Environment.NewLine;
+            }
+
+            // Add in extra docs.
+            html += "<a href=\"http://www.apsim.info/Report.aspx\">Report</a><br/>" + Environment.NewLine;
+            html += "<a href=\"http://www.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\">Memo</a><br/>" + Environment.NewLine;
+
+            html += "</body></html>";
+
+            return new MemoryStream(Encoding.UTF8.GetBytes(html));
+        }
+
+
+        private class Build
+        {
+            public DateTime date;
+            public int pullRequestID;
+            public int issueNumber;
+            public string issueTitle;
+            public string url;
         }
     }
 }

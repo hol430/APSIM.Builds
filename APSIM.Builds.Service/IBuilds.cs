@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -45,6 +46,13 @@ namespace APSIM.Builds.Service
         [OperationContract]
         [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         int GetIssueID(int pullRequestID);
+
+        /// <summary>
+        /// Get latest documentation HTML.
+        /// </summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetDocumentationHTML", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        Stream GetDocumentationHTML();
 
     }
 

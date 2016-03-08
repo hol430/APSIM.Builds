@@ -408,6 +408,45 @@ namespace APSIM.Builds.Service
             }
         }
 
+        /// <summary>Find the next job to run.</summary>
+        public int FindNextLinuxJob()
+        {
+            int JobID = -1;
+            using (SqlConnection connection = Open())
+            {
+                MarkFailedJobs(connection);
+                using (SqlCommand command = new SqlCommand(
+                                                         "SELECT ID FROM Classic WHERE Status = 'Pass' AND LinuxStatus = 'Queued' ORDER BY ID",
+                                                         connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                            JobID = Convert.ToInt32(reader["ID"]);
+                        reader.Close();
+                        return JobID;
+                    }
+                }
+            }
+        }
+
+        /// <summary>Mark "failed" jobs</summary>
+        private static void MarkFailedJobs(SqlConnection Connection)
+        {
+            string SQL = "SELECT ID FROM Classic WHERE (Status = 'Fail' OR Status = 'Aborted') AND LinuxStatus = 'Queued' ORDER BY ID";
+            List<int> ignoredJobs = new List<int>();
+            using (SqlCommand command = new SqlCommand(SQL, Connection))
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                        ignoredJobs.Add(Convert.ToInt32(reader[0]));
+                }
+
+            BuildsClassic builds = new BuildsClassic();
+            foreach (int jobID in ignoredJobs)
+                builds.UpdateField(jobID, "linuxStatus", "Ignored", GetValidPassword());
+        }
+
         /// <summary>Delete the specified job.</summary>
         public void DeleteJob(int JobNumber, string DbConnectPassword)
         {
@@ -483,7 +522,7 @@ namespace APSIM.Builds.Service
                             if (buildJob.WindowsNumDiffs == 0)
                             {
                                 buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe"; ;
-                                buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.zip";
+                                buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
                                 buildJob.Win32SFXURL = filesURL + "Apsim7.7-r" + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
                                 buildJob.Win64SFXURL = filesURL + "Apsim7.7-r" + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
                             }

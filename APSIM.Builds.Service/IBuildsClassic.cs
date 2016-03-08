@@ -109,6 +109,10 @@
         [WebGet(UriTemplate = "/FindNextJob", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         int FindNextJob();
 
+        /// <summary>Find the next job to run.</summary>
+        [WebGet(UriTemplate = "/FindNextLinuxJob", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int FindNextLinuxJob();
+
         /// <summary>Delete the specified job.</summary>
         [OperationContract]
         [WebGet(UriTemplate = "/DeleteJob?JobID={JobID}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
