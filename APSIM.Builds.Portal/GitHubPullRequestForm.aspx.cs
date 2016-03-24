@@ -28,14 +28,13 @@
                 ShowMessage("Pull request not merged - ignored");
             else if (gitHub.pull_request.IssueNumber == -1)
                 ShowMessage("Pull request doesn't reference an issue.");
-            else if (gitHub.pull_request.ResolvesIssue == false)
-                ShowMessage("Pull request doesn't resolve an issue.");
             else
             {
                 string url = "http://www.apsim.info/APSIM.Builds.Service/Builds.svc/AddBuild" +
                              "?pullRequestNumber=" + gitHub.pull_request.number +
                              "&issueID=" + gitHub.pull_request.IssueNumber +
                              "&issueTitle=" + gitHub.pull_request.IssueTitle +
+                             "&released=" + gitHub.pull_request.ResolvesIssue +
                              "&ChangeDBPassword=" + GetValidPassword();
 
                 StreamWriter o = new StreamWriter(@"D:\Websites\test.txt");

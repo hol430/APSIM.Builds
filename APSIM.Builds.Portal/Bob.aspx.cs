@@ -56,18 +56,20 @@ namespace APSIM.Builds.Portal
                                 HTMLLink("Linux64:" + buildJob.LinuxStatus, buildJob.LinuxDetailsURL);
 
                 row["StartTime"] = ((DateTime)buildJob.StartTime).ToString("dd MMM yyyy hh:mm tt");
-                row["Duration"] = buildJob.Duration + "min";
                 if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
 
-                row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL) + " " +
-                               HTMLLink("Binaries", buildJob.WindowsBinariesURL) + " " +
-                               HTMLLink("BuildTree", buildJob.WindowsBuildTreeURL) + " " +
-                               HTMLLink("WindowsInstaller", buildJob.WindowsInstallerURL) + " " +
-                               HTMLLink("WindowsInstallerFull", buildJob.WindowsInstallerFullURL) + " " +
-                               HTMLLink("Win32 SFX", buildJob.Win32SFXURL) + " " +
-                               HTMLLink("Win64 SFX", buildJob.Win64SFXURL);
-
+                if (statusText.Contains("Win32:Pass") || statusText.Contains("Win32:Fail"))
+                {
+                    row["Duration"] = buildJob.Duration + "min";
+                    row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL) + " " +
+                                   HTMLLink("Binaries", buildJob.WindowsBinariesURL) + " " +
+                                   HTMLLink("BuildTree", buildJob.WindowsBuildTreeURL) + " " +
+                                   HTMLLink("WindowsInstaller", buildJob.WindowsInstallerURL) + " " +
+                                   HTMLLink("WindowsInstallerFull", buildJob.WindowsInstallerFullURL) + " " +
+                                   HTMLLink("Win32 SFX", buildJob.Win32SFXURL) + " " +
+                                   HTMLLink("Win64 SFX", buildJob.Win64SFXURL);
+                }
                 data.Rows.Add(row);
             }
 
@@ -77,9 +79,9 @@ namespace APSIM.Builds.Portal
             // Colour pass / fail cells.
             foreach (GridViewRow Row in GridView.Rows)
             {
-                if (Row.Cells[5].Text.Contains("Pass"))
+                if (Row.Cells[5].Text.Contains("Win32:Pass"))
                     Row.Cells[5].BackColor = Color.PaleGreen;
-                else
+                else if (Row.Cells[5].Text.Contains("Win32:Fail"))
                     Row.Cells[5].BackColor = Color.LightSalmon;
             }
 

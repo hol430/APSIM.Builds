@@ -24,14 +24,14 @@ namespace APSIM.Builds.Service
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
         /// <param name="issueID">The issue ID.</param>
         /// <param name="issueTitle">The issue title.</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, string ChangeDBPassword)
+        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string ChangeDBPassword)
         {
             if (ChangeDBPassword == BuildsClassic.GetValidPassword())
             {
                 using (SqlConnection connection = BuildsClassic.Open())
                 {
-                    string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle) " +
-                                 "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle)";
+                    string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle, Released) " +
+                                 "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
 
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
@@ -39,6 +39,7 @@ namespace APSIM.Builds.Service
                         command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestNumber));
                         command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
                         command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
+                        command.Parameters.Add(new SqlParameter("@Released", released));
                         command.ExecuteNonQuery();
                     }
                 }
@@ -68,21 +69,24 @@ namespace APSIM.Builds.Service
                     {
                         while (reader.Read())
                         {
-                            int pullID = (int)reader["PullRequestID"];
-                            DateTime date = (DateTime)reader["Date"];
-
                             int buildIssueNumber = (int)reader["IssueNumber"];
+                            if ((bool)reader["Released"] && buildIssueNumber != issueNumber)
+                            {
+                                int pullID = (int)reader["PullRequestID"];
+                                DateTime date = (DateTime)reader["Date"];
 
-                            string version = ((DateTime)reader["Date"]).ToString("yyyy.MM.dd") + "." + buildIssueNumber;
 
-                            Upgrade upgrade = new Upgrade();
-                            upgrade.ReleaseDate = (DateTime)reader["Date"];
-                            upgrade.issueNumber = buildIssueNumber;
-                            upgrade.IssueTitle = (string)reader["IssueTitle"];
-                            upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                            upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
+                                string version = ((DateTime)reader["Date"]).ToString("yyyy.MM.dd") + "." + buildIssueNumber;
 
-                            upgrades.Add(upgrade);
+                                Upgrade upgrade = new Upgrade();
+                                upgrade.ReleaseDate = (DateTime)reader["Date"];
+                                upgrade.issueNumber = buildIssueNumber;
+                                upgrade.IssueTitle = (string)reader["IssueTitle"];
+                                upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
+                                upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
+
+                                upgrades.Add(upgrade);
+                            }
                         }
                     }
                 }

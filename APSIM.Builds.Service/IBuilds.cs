@@ -20,8 +20,8 @@ namespace APSIM.Builds.Service
         /// <param name="issueID">The issue ID.</param>
         /// <param name="issueTitle">The issue title.</param>
         [OperationContract]
-        [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&ChangeDBPassword={ChangeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void AddBuild(int pullRequestNumber, int issueID, string issueTitle, string ChangeDBPassword);
+        [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&Released={released}&ChangeDBPassword={ChangeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string ChangeDBPassword);
 
         /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
