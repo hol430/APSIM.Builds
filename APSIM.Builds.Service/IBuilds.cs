@@ -23,6 +23,14 @@ namespace APSIM.Builds.Service
         [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&Released={released}&ChangeDBPassword={ChangeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string ChangeDBPassword);
 
+        /// <summary>Add a green build to the build database.</summary>
+        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
+        /// <param name="buildTimeStamp">The build time stamp</param>
+        /// <param name="changeDBPassword">The password</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/AddGreenBuild?pullRequestNumber={pullRequestNumber}&buildTimeStamp={buildTimeStamp}&changeDBPassword={changeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        void AddGreenBuild(int pullRequestNumber, string buildTimeStamp, string changeDBPassword);
+
         /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
         /// </summary>
@@ -44,8 +52,8 @@ namespace APSIM.Builds.Service
         /// Get a GitHub issue ID from a pull request ID.
         /// </summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        int GetIssueID(int pullRequestID);
+        [WebGet(UriTemplate = "/GetPullRequestDetails?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        string GetPullRequestDetails(int pullRequestID);
 
         /// <summary>
         /// Get latest documentation HTML.

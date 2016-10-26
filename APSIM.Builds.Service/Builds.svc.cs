@@ -24,22 +24,49 @@ namespace APSIM.Builds.Service
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
         /// <param name="issueID">The issue ID.</param>
         /// <param name="issueTitle">The issue title.</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string ChangeDBPassword)
+        /// <param name="changeDBPassword">The password</param>
+        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string changeDBPassword)
         {
-            if (ChangeDBPassword == BuildsClassic.GetValidPassword())
+            if (changeDBPassword == BuildsClassic.GetValidPassword())
+            {
+                using (SqlConnection connection = BuildsClassic.Open())
+                {
+                    string sql = "UPDATE ApsimX " +
+                                 "SET IssueNumber=@IssueNumber, IssueTitle=@IssueTitle, Released=@Released " +
+                                 "WHERE PullRequestID=" + pullRequestNumber;
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
+                        command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
+                        command.Parameters.Add(new SqlParameter("@Released", released));
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
+        /// <summary>Add a green build to the build database.</summary>
+        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
+        /// <param name="buildTimeStamp">The build time stamp</param>
+        /// <param name="changeDBPassword">The password</param>
+        public void AddGreenBuild(int pullRequestNumber, string buildTimeStamp, string changeDBPassword)
+        {
+            if (changeDBPassword == BuildsClassic.GetValidPassword())
             {
                 using (SqlConnection connection = BuildsClassic.Open())
                 {
                     string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle, Released) " +
                                  "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
 
+                    DateTime date = DateTime.ParseExact(buildTimeStamp, "yyyy.MM.dd-HH:mm", null);
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
-                        command.Parameters.Add(new SqlParameter("@Date", DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")));
+                        command.Parameters.Add(new SqlParameter("@Date", date));
                         command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestNumber));
-                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
-                        command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
-                        command.Parameters.Add(new SqlParameter("@Released", released));
+                        command.Parameters.Add(new SqlParameter("@IssueNumber", string.Empty));
+                        command.Parameters.Add(new SqlParameter("@IssueTitle", string.Empty));
+                        command.Parameters.Add(new SqlParameter("@Released", false));
                         command.ExecuteNonQuery();
                     }
                 }
@@ -131,11 +158,11 @@ namespace APSIM.Builds.Service
         }
 
         /// <summary>
-        /// Get a GitHub issue ID from a pull request ID.
+        /// Get details about a GitHub pull request ID. Called from Jenkins.
         /// </summary>
         /// <param name="pullRequestID"></param>
-        /// <returns></returns>
-        public int GetIssueID(int pullRequestID)
+        /// <returns>Format of return string is yyyy-MM-dd hh:mm tt,ID</returns>
+        public string GetPullRequestDetails(int pullRequestID)
         {
             int issueID;
             string issueTitle;
@@ -144,7 +171,7 @@ namespace APSIM.Builds.Service
             if (issueID == 0)
                 throw new Exception("Cannot find issue number in pull request: " + pullRequestID);
 
-            return issueID;
+            return DateTime.Now.ToString("yyyy.MM.dd-HH:mm") + "," + issueID;
         }
      
         /// <summary>
@@ -213,6 +240,7 @@ namespace APSIM.Builds.Service
         private static Build GetLatestBuild()
         {
             string sql = "SELECT TOP 1 * FROM ApsimX " +
+                         " WHERE Released=1" +
                          " ORDER BY Date DESC";
 
             using (SqlConnection connection = BuildsClassic.Open())
