@@ -34,7 +34,7 @@
                              "?pullRequestNumber=" + gitHub.pull_request.number +
                              "&issueID=" + gitHub.pull_request.IssueNumber +
                              "&issueTitle=" + gitHub.pull_request.IssueTitle +
-                             "&released=" + gitHub.pull_request.ResolvesIssue +
+                             "&released=true" +
                              "&ChangeDBPassword=" + GetValidPassword();
 
                 StreamWriter o = new StreamWriter(@"D:\Websites\test.txt");

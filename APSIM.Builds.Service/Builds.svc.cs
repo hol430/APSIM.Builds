@@ -99,20 +99,20 @@ namespace APSIM.Builds.Service
                             int buildIssueNumber = (int)reader["IssueNumber"];
                             if ((bool)reader["Released"] && buildIssueNumber != issueNumber)
                             {
-                                int pullID = (int)reader["PullRequestID"];
-                                DateTime date = (DateTime)reader["Date"];
+                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
+                                {
+                                    int pullID = (int)reader["PullRequestID"];
+                                    DateTime date = (DateTime)reader["Date"];
 
+                                    Upgrade upgrade = new Upgrade();
+                                    upgrade.ReleaseDate = (DateTime)reader["Date"];
+                                    upgrade.issueNumber = buildIssueNumber;
+                                    upgrade.IssueTitle = (string)reader["IssueTitle"];
+                                    upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
+                                    upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
 
-                                string version = ((DateTime)reader["Date"]).ToString("yyyy.MM.dd") + "." + buildIssueNumber;
-
-                                Upgrade upgrade = new Upgrade();
-                                upgrade.ReleaseDate = (DateTime)reader["Date"];
-                                upgrade.issueNumber = buildIssueNumber;
-                                upgrade.IssueTitle = (string)reader["IssueTitle"];
-                                upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                                upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-
-                                upgrades.Add(upgrade);
+                                    upgrades.Add(upgrade);
+                                }
                             }
                         }
                     }
