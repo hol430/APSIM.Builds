@@ -45,8 +45,8 @@ namespace APSIM.Builds.Service
         /// </summary>
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>
         [OperationContract]
-        [WebGet(UriTemplate = "/GetURLOfLatestVersion", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        string GetURLOfLatestVersion();
+        [WebGet(UriTemplate = "/GetURLOfLatestVersion?operatingSystem={operatingSystem}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        string GetURLOfLatestVersion(string operatingSystem);
 
         /// <summary>
         /// Get a GitHub issue ID from a pull request ID.

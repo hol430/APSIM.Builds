@@ -97,7 +97,7 @@ namespace APSIM.Builds.Service
                         while (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            if ((bool)reader["Released"] && buildIssueNumber != issueNumber)
+                            if (buildIssueNumber != issueNumber)
                             {
                                 if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
                                 {
@@ -124,11 +124,17 @@ namespace APSIM.Builds.Service
         /// <summary>
         /// Gets the URL of the latest version.
         /// </summary>
+        /// <param name="operatingSystem">Operating system to get url for.</param>
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>
-        public string GetURLOfLatestVersion()
+        public string GetURLOfLatestVersion(string operatingSystem)
         {
             Build latestBuild = GetLatestBuild();
-            return latestBuild.url;
+            if (operatingSystem == "Debian")
+                return Path.ChangeExtension(latestBuild.url, ".deb");
+            else if (operatingSystem == "Mac")
+                return Path.ChangeExtension(latestBuild.url, ".dmg");
+            else
+                return latestBuild.url;
         }
 
         /// <summary>
