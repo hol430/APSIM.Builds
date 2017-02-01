@@ -97,7 +97,7 @@ namespace APSIM.Builds.Service
                         while (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            if (buildIssueNumber != issueNumber)
+                            if (buildIssueNumber > 0 && buildIssueNumber != issueNumber)
                             {
                                 if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
                                 {
