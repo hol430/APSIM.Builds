@@ -519,19 +519,27 @@ namespace APSIM.Builds.Service
                             buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
                             buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
 
+							string versionString;
+							if (buildJob.Revision < 3855)
+								versionString = "Apsim7.7-r";
+							else if (buildJob.Revision < 4035)
+								versionString = "Apsim7.8-r";
+							else
+								versionString = "Apsim7.9-r";
+							
                             if (buildJob.WindowsNumDiffs == 0)
                             {
                                 buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe"; ;
                                 buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
-                                buildJob.Win32SFXURL = filesURL + "Apsim7.8-r" + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
-                                buildJob.Win64SFXURL = filesURL + "Apsim7.8-r" + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
+                                buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
+                                buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
                             }
 
                             buildJob.WindowsStatus = (string)reader["Status"];
 
-                            buildJob.LinuxBinariesURL = filesURL + "Apsim7.8-r" + buildJob.Revision + ".LINUX.X86_64.exe";
-                            buildJob.LinuxDetailsURL = filesURL + "Apsim7.8-r" + buildJob.Revision + ".linux.txt";
-                            buildJob.LinuxDiffsURL = filesURL + "Apsim7.8-r" + buildJob.Revision + ".linux.txt";
+                            buildJob.LinuxBinariesURL = filesURL + versionString + buildJob.Revision + ".LINUX.X86_64.exe";
+                            buildJob.LinuxDetailsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
+                            buildJob.LinuxDiffsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
                             if (!Convert.IsDBNull(reader["LinuxNumDiffs"]))
                                 buildJob.LinuxNumDiffs = (int)reader["LinuxNumDiffs"];
                             buildJob.LinuxStatus = (string)reader["LinuxStatus"];
