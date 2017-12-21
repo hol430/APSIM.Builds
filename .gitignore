@@ -8,3 +8,4 @@ packages/
 *.suo
 APSIM.Builds.Portal/bin/
 APSIM.Builds.Portal/obj/
+APSIM.Builds.Portal/ValidationGraphs/

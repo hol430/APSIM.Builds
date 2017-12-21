@@ -1,6 +1,7 @@
 ﻿
 namespace APSIM.Builds.Service
 {
+    using Shared.Utilities;
     using Octokit;
     using System;
     using System.Collections.Generic;
@@ -276,9 +277,18 @@ namespace APSIM.Builds.Service
         public Stream GetDocumentationHTML()
         {
             WebOperationContext.Current.OutgoingResponse.ContentType = "text/html; charset=utf-8";
-            string html = "<html><body>" + Environment.NewLine;
-            
+            string html = "<html><head>" + Environment.NewLine;
+            html += "<link rel=\"shortcut icon\" href=\"https://apsimnextgeneration.netlify.com/images/favicon.png\" type=\"image/x-icon\" />" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/css/nucleus.css\" rel=\"stylesheet\" >" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/css/font-awesome.min.css\" rel=\"stylesheet\">" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/css/hybrid.css\" rel=\"stylesheet\">" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/css/featherlight.min.css\" rel=\"stylesheet\">" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/css/auto-complete.css\" rel=\"stylesheet\" >" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/theme-original/style.css\" rel=\"stylesheet\">" +
+                    "<link href=\"https://apsimnextgeneration.netlify.com/theme-original/variant-darkgreen.css\" rel=\"stylesheet\">" +
+                    "<link rel=\"stylesheet\" href=\"https://apsimnextgeneration.netlify.com/css/bootstrap.min.css\" >";
 
+            html += "</head><body>";
             Build latestBuild = GetLatestBuild();
 
             html += "<h2>Documentation for build <a href=\"https://github.com/APSIMInitiative/ApsimX/issues/" + latestBuild.issueNumber + "\">" +
@@ -292,7 +302,7 @@ namespace APSIM.Builds.Service
 
                 string modelName = Path.GetFileNameWithoutExtension(file);
                 modelName = modelName.Replace(latestBuild.issueNumber.ToString(), "");
-                html += "<a href=\"" + docURL + "\">" + modelName + "</a><br/>" + Environment.NewLine;
+                html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
             }
 
             // Add in extra docs.

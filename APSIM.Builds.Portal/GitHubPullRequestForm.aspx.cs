@@ -37,9 +37,6 @@
                              "&released=true" +
                              "&ChangeDBPassword=" + GetValidPassword();
 
-                StreamWriter o = new StreamWriter(@"D:\Websites\test.txt");
-                o.Write(url);
-                o.Close();
                 WebUtilities.CallRESTService<object>(url);
 
                 ShowMessage("Added release for issue " + gitHub.pull_request.IssueNumber);
