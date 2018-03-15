@@ -9,3 +9,6 @@ packages/
 APSIM.Builds.Portal/bin/
 APSIM.Builds.Portal/obj/
 APSIM.Builds.Portal/ValidationGraphs/
+ConsoleApplication1/App.config
+ConsoleApplication1/
+.vs/
