@@ -524,9 +524,11 @@ namespace APSIM.Builds.Service
 								versionString = "Apsim7.7-r";
 							else if (buildJob.Revision < 4035)
 								versionString = "Apsim7.8-r";
-							else
+							else if (buildJob.Revision < 4133)
 								versionString = "Apsim7.9-r";
-							
+                            else
+                                versionString = "Apsim7.10-r";
+
                             if (buildJob.WindowsNumDiffs == 0)
                             {
                                 buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe"; ;
