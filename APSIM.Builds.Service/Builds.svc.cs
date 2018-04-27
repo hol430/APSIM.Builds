@@ -121,6 +121,33 @@ namespace APSIM.Builds.Service
             }
             return upgrades;
         }
+        
+        /// <summary>
+        /// Gets a URL for a version that resolves the specified issue
+        /// </summary>
+        /// <param name="issueNumber">The issue number.</param>
+        public string GetURLOfVersionForIssue(int issueNumber)
+        {
+            List<Upgrade> upgrades = new List<Upgrade>();
+
+            DateTime issueResolvedDate = GetIssueResolvedDate(issueNumber);
+
+            string sql = "SELECT * FROM ApsimX " +
+                         "WHERE IssueNumber = " + issueNumber;
+
+            using (SqlConnection connection = BuildsClassic.Open())
+            {
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                            return @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + issueNumber + ".exe";
+                    }
+                }
+            }
+            return null;
+        }
 
         /// <summary>
         /// Gets the URL of the latest version.
@@ -306,8 +333,8 @@ namespace APSIM.Builds.Service
             }
 
             // Add in extra docs.
-            html += "<a href=\"http://www.apsim.info/Report.aspx\">Report</a><br/>" + Environment.NewLine;
-            html += "<a href=\"http://www.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\">Memo</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://www.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://www.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\" target=\"_blank\"> Memo</a><br/>" + Environment.NewLine;
 
             html += "</body></html>";
 

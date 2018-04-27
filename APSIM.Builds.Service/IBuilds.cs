@@ -49,6 +49,14 @@ namespace APSIM.Builds.Service
         string GetURLOfLatestVersion(string operatingSystem);
 
         /// <summary>
+        /// Gets a URL for a version that resolves the specified issue
+        /// </summary>
+        /// <param name="issueNumber">The issue number.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetURLOfVersionForIssue?issueID={issueID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        string GetURLOfVersionForIssue(int issueID);
+
+        /// <summary>
         /// Get a GitHub issue ID from a pull request ID.
         /// </summary>
         [OperationContract]
