@@ -30,16 +30,11 @@
                 ShowMessage("Pull request doesn't reference an issue.");
             else
             {
-                string url = "http://www.apsim.info/APSIM.Builds.Service/Builds.svc/AddBuild" +
-                             "?pullRequestNumber=" + gitHub.pull_request.number +
-                             "&issueID=" + gitHub.pull_request.IssueNumber +
-                             "&issueTitle=" + gitHub.pull_request.IssueTitle +
-                             "&released=" + gitHub.pull_request.ResolvesIssue +
-                             "&ChangeDBPassword=" + GetValidPassword();
-
-                WebUtilities.CallRESTService<object>(url);
-
-                ShowMessage("Added release for issue " + gitHub.pull_request.IssueNumber);
+                string issueNumber = gitHub.pull_request.IssueNumber.ToString();
+                string token = GetJenkinsToken();
+                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}", token, issueNumber);
+                WebUtilities.CallRESTService<object>(jenkinsUrl);
+                ShowMessage(string.Format("Triggered a deploy step for pull request {0} - {1}", gitHub.pull_request.number, gitHub.pull_request.Title));
             }
         }
 
@@ -51,6 +46,10 @@
             return connectionString.Substring(posPassword + "Password=".Length);
         }
 
+        private string GetJenkinsToken()
+        {
+            return File.ReadAllText(@"D:\Websites\JenkinsToken.txt");
+        }
         /// <summary>
         /// Get the JSON that GitHub has passed to us.
         /// </summary>
@@ -163,6 +162,27 @@
                     Task<Issue> issueTask = github.Issue.Get("APSIMInitiative", "ApsimX", IssueNumber);
                     issueTask.Wait();
                     return issueTask.Result.Title;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Returns the title of the pull request.
+        /// </summary>
+        public string Title
+        {
+            get
+            {
+                if (IssueNumber != -1)
+                {
+                    GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
+                    string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
+                    github.Credentials = new Credentials(token);
+                    Task<Octokit.PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", number);
+                    pullRequestTask.Wait();
+                    return pullRequestTask.Result.Title;
                 }
 
                 return null;
