@@ -34,7 +34,9 @@
                 string pullId = gitHub.pull_request.number.ToString();
                 string author = gitHub.pull_request.Author;
                 string token = GetJenkinsToken();
-                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}&PULL_ID={2}&COMMIT_AUTHOR={3}", token, issueNumber, pullId, author);
+                string issueTitle = gitHub.pull_request.IssueTitle.ToString();
+                string released = gitHub.pull_request.ResolvesIssue.ToString().ToLower();
+                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}&PULL_ID={2}&COMMIT_AUTHOR={3}&ISSUE_TITLE={4}&RELEASED={5}", token, issueNumber, pullId, author, issueTitle, released);
                 WebUtilities.CallRESTService<object>(jenkinsUrl);
                 ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", gitHub.pull_request.Author, gitHub.pull_request.number, gitHub.pull_request.Title));
             }
