@@ -31,8 +31,10 @@
             else
             {
                 string issueNumber = gitHub.pull_request.IssueNumber.ToString();
+                string pullId = gitHub.pull_request.number.ToString();
+                string author = gitHub.pull_request.Author;
                 string token = GetJenkinsToken();
-                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}", token, issueNumber);
+                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}&PULL_ID={2}&COMMIT_AUTHOR={3}", token, issueNumber, pullId, author);
                 WebUtilities.CallRESTService<object>(jenkinsUrl);
                 ShowMessage(string.Format("Triggered a deploy step for pull request {0} - {1}", gitHub.pull_request.number, gitHub.pull_request.Title));
             }
@@ -185,6 +187,23 @@
                     return pullRequestTask.Result.Title;
                 }
 
+                return null;
+            }
+        }
+
+        public string Author
+        {
+            get
+            {
+                if (IssueNumber != -1)
+                {
+                    GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
+                    string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
+                    github.Credentials = new Credentials(token);
+                    Task<Octokit.PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", number);
+                    pullRequestTask.Wait();
+                    return pullRequestTask.Result.User.Name;
+                }
                 return null;
             }
         }
