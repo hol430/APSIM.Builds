@@ -20,14 +20,6 @@ namespace APSIM.Builds.Service
         /// <param name="issueID">The issue ID.</param>
         /// <param name="issueTitle">The issue title.</param>
         [OperationContract]
-        [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&Released={released}&ChangeDBPassword={ChangeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string ChangeDBPassword);
-
-        /// <summary>Add a build to the build database.</summary>
-        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
-        [OperationContract]
         [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&Released={released}&buildTimeStamp={buildTimeStamp}&ChangeDBPassword={changeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string buildTimeStamp, string changeDBPassword);
 
