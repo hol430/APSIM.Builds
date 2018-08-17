@@ -47,6 +47,35 @@ namespace APSIM.Builds.Service
             }
         }
 
+        /// <summary>Add a build to the build database.</summary>
+        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
+        /// <param name="issueID">The issue ID.</param>
+        /// <param name="issueTitle">The issue title.</param>
+        /// /// <param name="buildTimeStamp">The build time stamp</param>
+        /// <param name="changeDBPassword">The password</param>
+        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string buildTimeStamp, string changeDBPassword)
+        {
+            if (changeDBPassword == BuildsClassic.GetValidPassword())
+            {
+                using (SqlConnection connection = BuildsClassic.Open())
+                {
+                    string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle, Released) " +
+                                 "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
+
+                    DateTime date = DateTime.ParseExact(buildTimeStamp, "yyyy.MM.dd-HH:mm", null);
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@Date", date));
+                        command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestNumber));
+                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
+                        command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
+                        command.Parameters.Add(new SqlParameter("@Released", released));
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
         /// <summary>Add a green build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
         /// <param name="buildTimeStamp">The build time stamp</param>
