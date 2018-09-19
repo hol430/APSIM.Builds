@@ -112,7 +112,10 @@ namespace APSIM.Builds.Service
         /// <returns>The list of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceIssue(int issueNumber)
         {
-            return GetUpgradesSinceDate(GetIssueResolvedDate(issueNumber));
+            DateTime date = GetIssueResolvedDate(issueNumber);
+            // We need to filter the list of all upgrades to remove any upgrades which are on the same day and
+            // fix the same issue.
+            return GetUpgradesSinceDate(date).Where(u => u.issueNumber != issueNumber || u.ReleaseDate.DayOfYear != date.DayOfYear).ToList();
         }
 
         /// <summary>
