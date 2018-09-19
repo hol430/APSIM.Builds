@@ -37,7 +37,7 @@ namespace APSIM.Builds.Service
                     int issueID;
                     string issueTitle;
                     GetIssueDetails(pullRequestNumber, out issueID, out issueTitle);
-                    bool released = PullResolvesIssue(pullRequestNumber);
+                    bool released = PullResolvesIssue(pullRequestNumber, issueID);
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.Add(new SqlParameter("@Date", date));
