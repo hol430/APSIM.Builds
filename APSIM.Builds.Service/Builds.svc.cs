@@ -137,10 +137,10 @@ namespace APSIM.Builds.Service
                         while (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            int released = (int)reader["Released"];
-                            if (buildIssueNumber > 0 && released == 1)
+                            bool released = (bool)reader["Released"];
+                            if (buildIssueNumber > 0)
                             {
-                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
+                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null && released)
                                 {
                                     Upgrade upgrade = new Upgrade();
                                     upgrade.ReleaseDate = (DateTime)reader["Date"];
