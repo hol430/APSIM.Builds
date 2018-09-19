@@ -17,11 +17,10 @@ namespace APSIM.Builds.Service
     {
         /// <summary>Add a build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
+        /// <param name="changeDBPassword">The passowrd.</param>
         [OperationContract]
-        [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&issueID={issueID}&issueTitle={issueTitle}&Released={released}&buildTimeStamp={buildTimeStamp}&ChangeDBPassword={changeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string buildTimeStamp, string changeDBPassword);
+        [WebGet(UriTemplate = "/AddBuild?pullRequestNumber={pullRequestNumber}&ChangeDBPassword={changeDBPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        void AddBuild(int pullRequestNumber, string changeDBPassword);
 
         /// <summary>Add a green build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>

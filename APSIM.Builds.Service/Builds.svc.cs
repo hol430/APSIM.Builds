@@ -23,37 +23,8 @@ namespace APSIM.Builds.Service
     {
         /// <summary>Add a build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
         /// <param name="changeDBPassword">The password</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string changeDBPassword)
-        {
-            if (changeDBPassword == BuildsClassic.GetValidPassword())
-            {
-                using (SqlConnection connection = BuildsClassic.Open())
-                {
-                    string sql = "UPDATE ApsimX " +
-                                 "SET IssueNumber=@IssueNumber, IssueTitle=@IssueTitle, Released=@Released " +
-                                 "WHERE PullRequestID=" + pullRequestNumber;
-
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
-                        command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
-                        command.Parameters.Add(new SqlParameter("@Released", released));
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-        }
-
-        /// <summary>Add a build to the build database.</summary>
-        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
-        /// /// <param name="buildTimeStamp">The build time stamp</param>
-        /// <param name="changeDBPassword">The password</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string buildTimeStamp, string changeDBPassword)
+        public void AddBuild(int pullRequestNumber, string changeDBPassword)
         {
             if (changeDBPassword == BuildsClassic.GetValidPassword())
             {
@@ -62,7 +33,11 @@ namespace APSIM.Builds.Service
                     string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle, Released) " +
                                  "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
 
-                    DateTime date = DateTime.ParseExact(buildTimeStamp, "yyyy.MM.dd-HH:mm", null);
+                    DateTime date = DateTime.Now;
+                    int issueID;
+                    string issueTitle;
+                    GetIssueDetails(pullRequestNumber, out issueID, out issueTitle);
+                    bool released = PullResolvesIssue(pullRequestNumber);
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.Add(new SqlParameter("@Date", date));
@@ -266,6 +241,17 @@ namespace APSIM.Builds.Service
                 issueTask.Wait();
                 issueTitle = issueTask.Result.Title;
             }
+        }
+
+        private static bool PullResolvesIssue(int pullID, int issueID)
+        {
+            GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
+            string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
+            github.Credentials = new Credentials(token);
+            Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
+            pullRequestTask.Wait();
+            PullRequest pullRequest = pullRequestTask.Result;
+            return pullRequest.Body.IndexOf(string.Format("Resolves #{0}", issueID), StringComparison.OrdinalIgnoreCase) > 0;
         }
 
         /// <summary>
