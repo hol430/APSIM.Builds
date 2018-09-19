@@ -40,6 +40,15 @@ namespace APSIM.Builds.Service
         List<Upgrade> GetUpgradesSinceIssue(int issueID);
 
         /// <summary>
+        /// Gets a list of possible upgrades since the specified Apsim version.
+        /// </summary>
+        /// <param name="version">Fully qualified (a.b.c.d) version number.</param>
+        /// <returns>List of possible upgrades.</returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetUpgradesSinceVersion?version={version}", BodyStyle = WebMessageBodyStyle.WrappedResponse)]
+        List<Upgrade> GetUpgradesSinceVersion(string version);
+
+        /// <summary>
         /// Gets the URL of the latest version.
         /// </summary>
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>

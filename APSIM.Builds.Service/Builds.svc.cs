@@ -14,6 +14,7 @@ namespace APSIM.Builds.Service
     using System.ServiceModel.Web;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Globalization;
 
 
     /// <summary>
@@ -79,18 +80,52 @@ namespace APSIM.Builds.Service
         }
 
         /// <summary>
+        /// Gets a list of possible upgrades since the specified Apsim version.
+        /// </summary>
+        /// <param name="version">Fully qualified (a.b.c.d) version number.</param>
+        /// <returns>List of possible upgrades.</returns>
+        public List<Upgrade> GetUpgradesSinceVersion(string version)
+        {
+            int issueNumber = 0;
+
+            int lastDotPosition = version.LastIndexOf(".");
+            int.TryParse(version.Substring(lastDotPosition + 1), out issueNumber);
+
+            string dateFromVersion = version.Substring(0, lastDotPosition);
+            string[] formats = new string[]
+            {
+                "yyyy.mm.dd",
+                "yyyy.m.dd",
+                "yyyy.mm.d",
+                "yyyy.m.d"
+            };
+            DateTime issueResolvedDate;
+            if (!DateTime.TryParseExact(dateFromVersion, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out issueResolvedDate))
+                throw new Exception(string.Format("Date is not in a valid format: {0}.", dateFromVersion));
+            return GetUpgradesSinceDate(issueResolvedDate).Where(u => u.issueNumber != issueNumber).ToList();
+        }
+
+        /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
         /// </summary>
         /// <param name="issueNumber">The issue number.</param>
         /// <returns>The list of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceIssue(int issueNumber)
         {
+            return GetUpgradesSinceDate(GetIssueResolvedDate(issueNumber));
+        }
+
+        /// <summary>
+        /// Gets all list of released upgrades since a given date.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <returns>List of possible upgrades.</returns>
+        private List<Upgrade> GetUpgradesSinceDate(DateTime date)
+        {
             List<Upgrade> upgrades = new List<Upgrade>();
 
-            DateTime issueResolvedDate = GetIssueResolvedDate(issueNumber);
-
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", issueResolvedDate) +
+                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date) +
                          " ORDER BY Date DESC";
 
             using (SqlConnection connection = BuildsClassic.Open())
@@ -102,20 +137,17 @@ namespace APSIM.Builds.Service
                         while (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            if (buildIssueNumber > 0 && buildIssueNumber != issueNumber)
+                            int released = (int)reader["Released"];
+                            if (buildIssueNumber > 0 && released == 1)
                             {
                                 if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
                                 {
-                                    int pullID = (int)reader["PullRequestID"];
-                                    DateTime date = (DateTime)reader["Date"];
-
                                     Upgrade upgrade = new Upgrade();
                                     upgrade.ReleaseDate = (DateTime)reader["Date"];
                                     upgrade.issueNumber = buildIssueNumber;
                                     upgrade.IssueTitle = (string)reader["IssueTitle"];
                                     upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
                                     upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-
                                     upgrades.Add(upgrade);
                                 }
                             }
@@ -125,7 +157,7 @@ namespace APSIM.Builds.Service
             }
             return upgrades;
         }
-        
+
         /// <summary>
         /// Gets a URL for a version that resolves the specified issue
         /// </summary>
@@ -179,7 +211,8 @@ namespace APSIM.Builds.Service
             DateTime resolvedDate = new DateTime(2015, 1, 1);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber;
+                         "WHERE IssueNumber = " + issueNumber +
+                         "ORDER BY Date DESC";
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
