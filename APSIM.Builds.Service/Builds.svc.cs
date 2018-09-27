@@ -287,7 +287,7 @@ namespace APSIM.Builds.Service
             Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
             pullRequestTask.Wait();
             PullRequest pullRequest = pullRequestTask.Result;
-            return pullRequest.Body.IndexOf(string.Format("Resolves #{0}", issueID), StringComparison.OrdinalIgnoreCase) > 0;
+            return pullRequest.Body.IndexOf(string.Format("Resolves #{0}", issueID), StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
