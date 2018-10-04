@@ -14,6 +14,7 @@ namespace APSIM.Builds.Service
     using System.ServiceModel.Web;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Globalization;
 
 
     /// <summary>
@@ -23,37 +24,8 @@ namespace APSIM.Builds.Service
     {
         /// <summary>Add a build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
         /// <param name="changeDBPassword">The password</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string changeDBPassword)
-        {
-            if (changeDBPassword == BuildsClassic.GetValidPassword())
-            {
-                using (SqlConnection connection = BuildsClassic.Open())
-                {
-                    string sql = "UPDATE ApsimX " +
-                                 "SET IssueNumber=@IssueNumber, IssueTitle=@IssueTitle, Released=@Released " +
-                                 "WHERE PullRequestID=" + pullRequestNumber;
-
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
-                        command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
-                        command.Parameters.Add(new SqlParameter("@Released", released));
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-        }
-
-        /// <summary>Add a build to the build database.</summary>
-        /// <param name="pullRequestNumber">The GitHub pull request number.</param>
-        /// <param name="issueID">The issue ID.</param>
-        /// <param name="issueTitle">The issue title.</param>
-        /// /// <param name="buildTimeStamp">The build time stamp</param>
-        /// <param name="changeDBPassword">The password</param>
-        public void AddBuild(int pullRequestNumber, int issueID, string issueTitle, bool released, string buildTimeStamp, string changeDBPassword)
+        public void AddBuild(int pullRequestNumber, string changeDBPassword)
         {
             if (changeDBPassword == BuildsClassic.GetValidPassword())
             {
@@ -62,7 +34,11 @@ namespace APSIM.Builds.Service
                     string sql = "INSERT INTO ApsimX (Date, PullRequestID, IssueNumber, IssueTitle, Released) " +
                                  "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
 
-                    DateTime date = DateTime.ParseExact(buildTimeStamp, "yyyy.MM.dd-HH:mm", null);
+                    DateTime date = DateTime.Now;
+                    int issueID;
+                    string issueTitle;
+                    GetIssueDetails(pullRequestNumber, out issueID, out issueTitle);
+                    bool released = PullResolvesIssue(pullRequestNumber, issueID);
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.Add(new SqlParameter("@Date", date));
@@ -104,18 +80,55 @@ namespace APSIM.Builds.Service
         }
 
         /// <summary>
+        /// Gets a list of possible upgrades since the specified Apsim version.
+        /// </summary>
+        /// <param name="version">Fully qualified (a.b.c.d) version number.</param>
+        /// <returns>List of possible upgrades.</returns>
+        public List<Upgrade> GetUpgradesSinceVersion(string version)
+        {
+            int issueNumber = 0;
+
+            int lastDotPosition = version.LastIndexOf(".");
+            int.TryParse(version.Substring(lastDotPosition + 1), out issueNumber);
+
+            string dateFromVersion = version.Substring(0, lastDotPosition);
+            string[] formats = new string[]
+            {
+                "yyyy.mm.dd",
+                "yyyy.m.dd",
+                "yyyy.mm.d",
+                "yyyy.m.d"
+            };
+            DateTime issueResolvedDate;
+            if (!DateTime.TryParseExact(dateFromVersion, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out issueResolvedDate))
+                throw new Exception(string.Format("Date is not in a valid format: {0}.", dateFromVersion));
+            return GetUpgradesSinceDate(issueResolvedDate).Where(u => u.issueNumber != issueNumber).ToList();
+        }
+
+        /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
         /// </summary>
         /// <param name="issueNumber">The issue number.</param>
         /// <returns>The list of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceIssue(int issueNumber)
         {
+            DateTime date = GetIssueResolvedDate(issueNumber);
+            // We need to filter the list of all upgrades to remove any upgrades which are on the same day and
+            // fix the same issue.
+            return GetUpgradesSinceDate(date).Where(u => u.issueNumber != issueNumber || u.ReleaseDate.DayOfYear != date.DayOfYear).ToList();
+        }
+
+        /// <summary>
+        /// Gets all list of released upgrades since a given date.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <returns>List of possible upgrades.</returns>
+        private List<Upgrade> GetUpgradesSinceDate(DateTime date)
+        {
             List<Upgrade> upgrades = new List<Upgrade>();
 
-            DateTime issueResolvedDate = GetIssueResolvedDate(issueNumber);
-
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", issueResolvedDate) +
+                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date) +
                          " ORDER BY Date DESC";
 
             using (SqlConnection connection = BuildsClassic.Open())
@@ -127,20 +140,17 @@ namespace APSIM.Builds.Service
                         while (reader.Read())
                         {
                             int buildIssueNumber = (int)reader["IssueNumber"];
-                            if (buildIssueNumber > 0 && buildIssueNumber != issueNumber)
+                            bool released = (bool)reader["Released"];
+                            if (buildIssueNumber > 0)
                             {
-                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null)
+                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null && released)
                                 {
-                                    int pullID = (int)reader["PullRequestID"];
-                                    DateTime date = (DateTime)reader["Date"];
-
                                     Upgrade upgrade = new Upgrade();
                                     upgrade.ReleaseDate = (DateTime)reader["Date"];
                                     upgrade.issueNumber = buildIssueNumber;
                                     upgrade.IssueTitle = (string)reader["IssueTitle"];
                                     upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
                                     upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-
                                     upgrades.Add(upgrade);
                                 }
                             }
@@ -150,7 +160,7 @@ namespace APSIM.Builds.Service
             }
             return upgrades;
         }
-        
+
         /// <summary>
         /// Gets a URL for a version that resolves the specified issue
         /// </summary>
@@ -204,7 +214,8 @@ namespace APSIM.Builds.Service
             DateTime resolvedDate = new DateTime(2015, 1, 1);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber;
+                         "WHERE IssueNumber = " + issueNumber +
+                         "ORDER BY Date DESC";
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
@@ -268,6 +279,17 @@ namespace APSIM.Builds.Service
             }
         }
 
+        private static bool PullResolvesIssue(int pullID, int issueID)
+        {
+            GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
+            string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
+            github.Credentials = new Credentials(token);
+            Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
+            pullRequestTask.Wait();
+            PullRequest pullRequest = pullRequestTask.Result;
+            return pullRequest.Body.IndexOf(string.Format("Resolves #{0}", issueID), StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         /// <summary>
         /// Returns a resolved issue id or -1 if not found.
         /// </summary>
@@ -288,7 +310,7 @@ namespace APSIM.Builds.Service
 
                     int posSpace = pullRequestBody.IndexOfAny(new char[] { ' ', '\r', '\n',
                                                                            '\t', '.', ';',
-                                                                           ':', '+', '&' }, posHash);
+                                                                           ':', '+', '&', ',' }, posHash);
                     if (posSpace == -1)
                         posSpace = pullRequestBody.Length;
                     if (posSpace != -1)
