@@ -126,7 +126,7 @@
 
                         int posSpace = body.IndexOfAny(new char[] { ' ', '\r', '\n',
                                                                            '\t', '.', ';',
-                                                                           ':', '+', '&' }, posHash);
+                                                                           ':', '+', '&', ',' }, posHash);
                         if (posSpace == -1)
                             posSpace = body.Length;
                         if (posSpace != -1)

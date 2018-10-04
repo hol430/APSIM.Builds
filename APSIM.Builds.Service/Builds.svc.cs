@@ -310,7 +310,7 @@ namespace APSIM.Builds.Service
 
                     int posSpace = pullRequestBody.IndexOfAny(new char[] { ' ', '\r', '\n',
                                                                            '\t', '.', ';',
-                                                                           ':', '+', '&' }, posHash);
+                                                                           ':', '+', '&', ',' }, posHash);
                     if (posSpace == -1)
                         posSpace = pullRequestBody.Length;
                     if (posSpace != -1)
