@@ -17,7 +17,7 @@
         <form id="form1" runat="server">
             <div>
                 <h1>APSIM Build system</h1>
-                <h2 id="inactive-warning">Note: the build system for APSIM is being moved to <a href="https://github.com/APSIMInitiative">GitHub</a>. Bob is not accepting new builds at this stage.</h2>
+                <h2 id="inactive-warning">Note: the build system for APSIM is being moved to <a href="https://github.com/APSIMInitiative/APSIMClassic">GitHub</a>. Bob is not accepting new builds at this stage.</h2>
             </div>
             <p style="margin-left: 0px; margin-bottom: 19px">
                 <asp:Button ID="UploadButton" runat="server" onclick="UploadButton_Click" enabled="false"
