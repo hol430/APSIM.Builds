@@ -10,15 +10,17 @@
         <style>
             h1 {font-family: arial;}
             table {font-family: arial;font-size:90%;}
+            #inactive-warning {color: red;}
             </style>
     </head>
     <body>
         <form id="form1" runat="server">
             <div>
                 <h1>APSIM Build system</h1>
+                <h2 id="inactive-warning">Note: the build system for APSIM is being moved to <a href="https://github.com/APSIMInitiative">GitHub</a>. Bob is not accepting new builds at this stage.</h2>
             </div>
             <p style="margin-left: 0px; margin-bottom: 19px">
-                <asp:Button ID="UploadButton" runat="server" onclick="UploadButton_Click" 
+                <asp:Button ID="UploadButton" runat="server" onclick="UploadButton_Click" enabled="false"
                             Text="Upload job" />
      Number of rows:
                 <asp:TextBox ID="NumRowsTextBox" runat="server" AutoPostBack="True" 
