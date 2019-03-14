@@ -1,6 +1,7 @@
 ﻿
 namespace APSIM.Builds.Service
 {
+    using Octokit;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -15,6 +16,16 @@ namespace APSIM.Builds.Service
                      Namespace = "http://www.apsim.info/services")]
     public class BuildsClassic : IBuildsClassic
     {
+        /// <summary>
+        /// Owner of the APSIM repository on GitHub.
+        /// </summary>
+        private const string repoOwner = "APSIMInitiative";
+
+        /// <summary>
+        /// Name of the APSIM repository on GitHub.
+        /// </summary>
+        private const string repoName = "APSIMClassic";
+
         /// <summary>Add a new entry to the builds database.</summary>
         public void Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword)
         {
@@ -603,6 +614,15 @@ namespace APSIM.Builds.Service
             return connectionString.Substring(posPassword + "Password=".Length);
         }
 
+        /// <summary>
+        /// Gets the ID of the issue referenced by a pull request.
+        /// </summary>
+        /// <param name="pullRequestID">ID of the pull request.</param>
+        public int GetIssueID(int pullRequestID)
+        {
+            PullRequest pull = GitHubUtilities.GetPullRequest(pullRequestID, repoOwner, repoName);
+            return pull.GetIssueID();
+        }
     }
 }
 

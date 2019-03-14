@@ -118,6 +118,7 @@
     <Compile Include="DeleteJob.aspx.designer.cs">
       <DependentUpon>DeleteJob.aspx</DependentUpon>
     </Compile>
+    <Compile Include="..\APSIM.Builds.Service\GitHubUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GitHubPullRequestForm.aspx.cs">
       <DependentUpon>GitHubPullRequestForm.aspx</DependentUpon>

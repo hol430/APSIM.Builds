@@ -128,6 +128,13 @@
         [WebGet(UriTemplate = "/GetIssueList")]
         BugTracker[] GetIssueList();
 
+        /// <summary>
+        /// Gets the ID of the issue referenced by a pull request.
+        /// </summary>
+        /// <param name="pullRequestID">ID of the pull request.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int GetIssueID(int pullRequestID);
     }
 
 

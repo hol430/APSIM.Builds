@@ -22,6 +22,16 @@ namespace APSIM.Builds.Service
     /// </summary>
     public class Builds : IBuilds
     {
+        /// <summary>
+        /// Owner of the ApsimX repo on github.
+        /// </summary>
+        private const string owner = "APSIMInitiative";
+
+        /// <summary>
+        /// Name of the ApsimX repo on github.
+        /// </summary>
+        private const string repo = "ApsimX";
+
         /// <summary>Add a build to the build database.</summary>
         /// <param name="pullRequestNumber">The GitHub pull request number.</param>
         /// <param name="changeDBPassword">The password</param>
@@ -35,15 +45,14 @@ namespace APSIM.Builds.Service
                                  "VALUES (@Date, @PullRequestID, @IssueNumber, @IssueTitle, @Released)";
 
                     DateTime date = DateTime.Now;
-                    int issueID;
-                    string issueTitle;
-                    GetIssueDetails(pullRequestNumber, out issueID, out issueTitle);
-                    bool released = PullResolvesIssue(pullRequestNumber, issueID);
+                    PullRequest pull = GitHubUtilities.GetPullRequest(pullRequestNumber, owner, repo);
+                    pull.GetIssueDetails(out int issueNumber, out bool released);
+                    string issueTitle = pull.GetIssueTitle(owner, repo);
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.Add(new SqlParameter("@Date", date));
                         command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestNumber));
-                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueID));
+                        command.Parameters.Add(new SqlParameter("@IssueNumber", issueNumber));
                         command.Parameters.Add(new SqlParameter("@IssueTitle", issueTitle));
                         command.Parameters.Add(new SqlParameter("@Released", released));
                         command.ExecuteNonQuery();
@@ -238,89 +247,15 @@ namespace APSIM.Builds.Service
         /// <returns>Format of return string is yyyy-MM-dd hh:mm tt,ID</returns>
         public string GetPullRequestDetails(int pullRequestID)
         {
-            int issueID;
-            string issueTitle;
-            GetIssueDetails(pullRequestID, out issueID, out issueTitle);
+            PullRequest pull = GitHubUtilities.GetPullRequest(pullRequestID, owner, repo);
+            pull.GetIssueDetails(out int issueID, out _);
 
-            if (issueID == 0)
+            if (issueID <= 0)
                 throw new Exception("Cannot find issue number in pull request: " + pullRequestID);
 
             return DateTime.Now.ToString("yyyy.MM.dd-HH:mm") + "," + issueID;
         }
      
-        /// <summary>
-        /// Try and get a issue number and title for the specified pull request id. If not 
-        /// a valid release then will return issueID = 0;
-        /// </summary>
-        /// <remarks>
-        /// A valid release is one that is merged and has 'Resolves #xxx" in the body
-        /// of the pull request.
-        /// </remarks>
-        /// <param name="pullID"></param>
-        /// <param name="issueID">The issue ID found.</param>
-        /// <param name="issueTitle">The issue title found.</param>
-        private static void GetIssueDetails(int pullID, out int issueID, out string issueTitle)
-        {
-            issueID = 0;
-            issueTitle = null;
-
-            GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-            string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
-            github.Credentials = new Credentials(token);
-            Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
-            pullRequestTask.Wait();
-            PullRequest pullRequest = pullRequestTask.Result;
-            issueID = GetIssueID(pullRequest.Body);
-            if (issueID != -1)
-            {
-                Task<Issue> issueTask = github.Issue.Get("APSIMInitiative", "ApsimX", issueID);
-                issueTask.Wait();
-                issueTitle = issueTask.Result.Title;
-            }
-        }
-
-        private static bool PullResolvesIssue(int pullID, int issueID)
-        {
-            GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-            string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
-            github.Credentials = new Credentials(token);
-            Task<PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", pullID);
-            pullRequestTask.Wait();
-            PullRequest pullRequest = pullRequestTask.Result;
-            return pullRequest.Body.IndexOf(string.Format("Resolves #{0}", issueID), StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        /// <summary>
-        /// Returns a resolved issue id or -1 if not found.
-        /// </summary>
-        /// <param name="pullRequestBody">The text of the pull request body.</param>
-        /// <returns>The issue ID or -1 if not found.</returns>
-        private static int GetIssueID(string pullRequestBody)
-        {
-            int posResolves = pullRequestBody.IndexOf("Resolves", StringComparison.InvariantCultureIgnoreCase);
-            if (posResolves == -1)
-                posResolves = pullRequestBody.IndexOf("Working on", StringComparison.InvariantCultureIgnoreCase);
-
-            if (posResolves != -1)
-            {
-                int posHash = pullRequestBody.IndexOf("#", posResolves);
-                if (posHash != -1)
-                {
-                    int issueID = 0;
-
-                    int posSpace = pullRequestBody.IndexOfAny(new char[] { ' ', '\r', '\n',
-                                                                           '\t', '.', ';',
-                                                                           ':', '+', '&', ',' }, posHash);
-                    if (posSpace == -1)
-                        posSpace = pullRequestBody.Length;
-                    if (posSpace != -1)
-                        if (Int32.TryParse(pullRequestBody.Substring(posHash + 1, posSpace - posHash - 1), out issueID))
-                            return issueID;
-                }
-            }
-            return -1;
-        }
-
         /// <summary>Get the latest build.</summary>
         private static Build GetLatestBuild()
         {
