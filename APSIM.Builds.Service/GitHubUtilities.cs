@@ -31,10 +31,10 @@ namespace APSIM.Builds
         /// </summary>
         /// <param name="id">ID of the pull request.</param>
         /// <param name="owner">
-        /// Owner of the GitHub repository on which the pull request was made.
+        /// Owner of the GitHub repository on which the pull request was created.
         /// </param>
         /// <param name="repo">
-        /// Name of the GitHub repository on which the pull request was made.
+        /// Name of the GitHub repository on which the pull request was created.
         /// </param>
         /// <returns>
         /// An Octokit PullRequest object representing the pull request.
@@ -48,6 +48,19 @@ namespace APSIM.Builds
             return pullRequestTask.Result;
         }
 
+        /// <summary>
+        /// Fetches information about a GitHub issue.
+        /// </summary>
+        /// <param name="id">ID of the issue.</param>
+        /// <param name="owner">
+        /// Owner of the GitHub repository on which the issue was created.
+        /// </param>
+        /// <param name="repo">
+        /// Name of the GitHub repository on which the issue was created.
+        /// </param>
+        /// <returns>
+        /// An Octokit Issue object representing the issue.
+        /// </returns>
         public static Issue GetIssue(int id, string owner, string repo)
         {
             GitHubClient client = new GitHubClient(new ProductHeaderValue(owner));
@@ -56,6 +69,7 @@ namespace APSIM.Builds
             issueTask.Wait();
             return issueTask.Result;
         }
+
         /// <summary>
         /// Fetches the title of the issue addressed by a pull request.
         /// </summary>
@@ -86,6 +100,11 @@ namespace APSIM.Builds
             return issueID;
         }
 
+        /// <summary>
+        /// Checks whether an issue will be closed by the pull request when
+        /// it is merged.
+        /// </summary>
+        /// <param name="pullRequest">The pull request.</param>
         public static bool FixesAnIssue(this PullRequest pullRequest)
         {
             GetIssueDetails(pullRequest, out int issueID, out bool resolves);
@@ -125,6 +144,9 @@ namespace APSIM.Builds
             }
         }
 
+        /// <summary>
+        /// Gets credentials which will be passed to octokit to make API requests.
+        /// </summary>
         private static Credentials GetGitHubCredentials()
         {
             try
