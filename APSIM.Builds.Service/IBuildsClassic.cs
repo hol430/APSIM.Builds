@@ -12,7 +12,13 @@
         [OperationContract]
         [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&DbConnectPassword={DbConnectPassword}", 
                 BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword);
+        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword);
+
+        /// <summary>Add a new entry to the builds database.</summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/AddPullRequest?PullID={PullID}&Password={Password}&DbConnectPassword={DbConnectPassword}",
+                BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int AddPullRequest(int PullID, string Password, string DbConnectPassword);
 
         /// <summary>Return details about a specific job.</summary>
         [OperationContract]

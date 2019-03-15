@@ -59,7 +59,7 @@
                     string patchFileName = payload.PullRequest.Number.ToString();
                     string description = payload.PullRequest.Title;
                     string bugID = payload.PullRequest.GetIssueID().ToString();
-                    bool doCommit = true;
+                    bool doCommit = false;
                     string dbConnectPassword = GetValidPassword();
                     string url = $"https://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add?UserName={username}&Password={password}&PatchFileName={patchFileName}&Description={description}&BugID={bugID}&DoCommit={doCommit}&DbConnectPassword={dbConnectPassword}";
                     WebUtilities.CallRESTService<object>(url);

@@ -46,7 +46,10 @@ namespace APSIM.Builds.Portal
                 row["User"] = buildJob.UserName;
                 row["PatchFile"] = HTMLLink(GetShortPatchFile(buildJob.PatchFileURL), buildJob.PatchFileURL);
                 row["Description"] = buildJob.Description;
-                row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
+                if (buildJob.StartTime.Year >= 2019)
+                    row["Task"] = HTMLLink("#" + buildJob.TaskID, "https://github.com/APSIMInitiative/APSIMClassic/issues/" + buildJob.TaskID);
+                else
+                    row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
 
                 string statusText = "Win32:" + buildJob.WindowsStatus;
                 if (buildJob.WindowsNumDiffs > 0)

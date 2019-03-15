@@ -27,11 +27,12 @@ namespace APSIM.Builds.Service
         private const string repoName = "APSIMClassic";
 
         /// <summary>Add a new entry to the builds database.</summary>
-        public void Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword)
+        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword)
         {
             if (DbConnectPassword == GetValidPassword())
             {
                 string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus) " +
+                             "Output Inserted.ID " +
                              "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus)";
 
                 string NowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
@@ -52,10 +53,27 @@ namespace APSIM.Builds.Service
                             command.Parameters.Add(new SqlParameter("@DoCommit", "1"));
                         else
                             command.Parameters.Add(new SqlParameter("@DoCommit", "0"));
-                        command.ExecuteNonQuery();
+                        return (int)command.ExecuteScalar();
                     }
                 }
             }
+            return -1;
+        }
+
+        /// <summary>
+        /// Add a new entry to the builds database.
+        /// </summary>
+        public int AddPullRequest(int PullID, string Password, string DbConnectPassword)
+        {
+            PullRequest pull = GitHubUtilities.GetPullRequest(PullID, repoOwner, repoName);
+
+            string author = pull.User.Login;
+            string patchFileName = PullID.ToString(); // Use Pull Request ID as patch file names.
+            string description = pull.Title;
+            int issueId = pull.GetIssueID();
+            bool doCommit = false; // Legacy option.
+
+            return Add(author, Password, patchFileName, description, issueId, doCommit, DbConnectPassword);
         }
 
         /// <summary>Return details about a specific job.</summary>
