@@ -157,6 +157,7 @@
         public DateTime StartTime;
         public int Duration;
         public int Revision;
+        public string XmlUrl;
 
         public string WindowsStatus;
         public int WindowsNumDiffs;

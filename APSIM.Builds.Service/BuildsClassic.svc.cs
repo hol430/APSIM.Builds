@@ -544,13 +544,17 @@ namespace APSIM.Builds.Service
                                 buildJob.PatchFileURL = filesURL + baseFileName + ".zip";
                                 buildJob.PatchFileNameShort = buildJob.PatchFileName;
                                 buildJob.WindowsDetailsURL = $"http://www.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
+                                buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
                             }
                             else
                             {
-                                buildJob.PatchFileURL = filesURL + (string)reader["PatchFileName"];
+                                buildJob.PatchFileURL = filesURL + buildJob.PatchFileName;
                                 buildJob.PatchFileNameShort = GetShortPatchFileName((string)reader["PatchFileName"]);
                                 buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
+                                buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
                             }
+
+                            
 
                             if (!Convert.IsDBNull(reader["NumDiffs"]))
                                 buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];

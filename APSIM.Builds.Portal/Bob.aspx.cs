@@ -56,14 +56,14 @@ namespace APSIM.Builds.Portal
                 if (buildJob.WindowsNumDiffs > 0)
                     statusText += " (" + buildJob.WindowsNumDiffs + ")";
                 row["Status"] = HTMLLink(statusText, buildJob.WindowsDetailsURL) + " " +
-                                HTMLLink("(xml)", Path.ChangeExtension(buildJob.WindowsDetailsURL, ".xml"));
+                                HTMLLink("(xml)", buildJob.XmlUrl);
 
                 row["StartTime"] = ((DateTime)buildJob.StartTime).ToString("dd MMM yyyy hh:mm tt");
 
                 if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
                 else if (buildJob.BuiltOnJenkins)
-                    row["Revision"] = HTMLLink($"#{buildJob.PatchFileURL}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileURL}.diff");
+                    row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
 
                 if (statusText.Contains("Win32:Pass") || statusText.Contains("Win32:Fail"))
                 {
@@ -85,10 +85,10 @@ namespace APSIM.Builds.Portal
             // Colour pass / fail cells.
             foreach (GridViewRow Row in GridView.Rows)
             {
-                if (Row.Cells[5].Text.Contains("Win32:Pass"))
-                    Row.Cells[5].BackColor = Color.PaleGreen;
-                else if (Row.Cells[5].Text.Contains("Win32:Fail"))
-                    Row.Cells[5].BackColor = Color.LightSalmon;
+                if (Row.Cells[4].Text.Contains("Win32:Pass"))
+                    Row.Cells[4].BackColor = Color.PaleGreen;
+                else if (Row.Cells[4].Text.Contains("Win32:Fail"))
+                    Row.Cells[4].BackColor = Color.LightSalmon;
             }
 
             PopulateChart();
@@ -163,14 +163,14 @@ namespace APSIM.Builds.Portal
             List<Commiter> Commiters = new List<Commiter>();
             foreach (GridViewRow Row in GridView.Rows)
             {
-                string Author = Row.Cells[1].Text;
+                string Author = Row.Cells[0].Text;
                 Commiter Commiter = Commiters.Find(delegate (Commiter C) { return C.Author == Author; });
                 if (Commiter == null)
                 {
                     Commiter = new Commiter() { Author = Author };
                     Commiters.Add(Commiter);
                 }
-                if (Row.Cells[5].Text.Contains("Pass"))
+                if (Row.Cells[4].Text.Contains("Pass"))
                     Commiter.NumPasses++;
                 else
                     Commiter.NumFailures++;
@@ -250,6 +250,7 @@ namespace APSIM.Builds.Portal
         public DateTime StartTime;
         public int Duration;
         public int Revision;
+        public string XmlUrl;
 
         public string WindowsStatus;
         public int WindowsNumDiffs;
