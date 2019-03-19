@@ -28,7 +28,6 @@ namespace APSIM.Builds.Portal
             BuildJob[] buildJobs = WebUtilities.CallRESTService<BuildJob[]>(url);
 
             DataTable data = new DataTable();
-            data.Columns.Add("Action", typeof(string));
             data.Columns.Add("User", typeof(string));
             data.Columns.Add("PatchFile", typeof(string));
             data.Columns.Add("Description", typeof(string));
@@ -42,11 +41,13 @@ namespace APSIM.Builds.Portal
             foreach (BuildJob buildJob in buildJobs)
             {
                 DataRow row = data.NewRow();
-                row["Action"] = HTMLLink("Delete", baseURL + "/DeleteJob.aspx?ID=" + buildJob.ID);
                 row["User"] = buildJob.UserName;
-                row["PatchFile"] = HTMLLink(GetShortPatchFile(buildJob.PatchFileURL), buildJob.PatchFileURL);
+
+                row["PatchFile"] = HTMLLink(buildJob.PatchFileNameShort, buildJob.PatchFileURL);
+
                 row["Description"] = buildJob.Description;
-                if (buildJob.StartTime.Year >= 2019)
+
+                if (buildJob.BuiltOnJenkins)
                     row["Task"] = HTMLLink("#" + buildJob.TaskID, "https://github.com/APSIMInitiative/APSIMClassic/issues/" + buildJob.TaskID);
                 else
                     row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
@@ -55,12 +56,14 @@ namespace APSIM.Builds.Portal
                 if (buildJob.WindowsNumDiffs > 0)
                     statusText += " (" + buildJob.WindowsNumDiffs + ")";
                 row["Status"] = HTMLLink(statusText, buildJob.WindowsDetailsURL) + " " +
-                                HTMLLink("(xml)", Path.ChangeExtension(buildJob.WindowsDetailsURL, ".xml")) + " " +
-                                HTMLLink("Linux64:" + buildJob.LinuxStatus, buildJob.LinuxDetailsURL);
+                                HTMLLink("(xml)", Path.ChangeExtension(buildJob.WindowsDetailsURL, ".xml"));
 
                 row["StartTime"] = ((DateTime)buildJob.StartTime).ToString("dd MMM yyyy hh:mm tt");
+
                 if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
+                else if (buildJob.BuiltOnJenkins)
+                    row["Revision"] = HTMLLink($"#{buildJob.PatchFileURL}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileURL}.diff");
 
                 if (statusText.Contains("Win32:Pass") || statusText.Contains("Win32:Fail"))
                 {
@@ -118,7 +121,7 @@ namespace APSIM.Builds.Portal
             if (posLastSlash != -1 && posOpenBracket != -1)
                 return patchFileURL.Substring(posLastSlash + 1, posOpenBracket - posLastSlash - 1);
             else
-                return null;
+                return patchFileURL;
         }
 
         private string HTMLLink(string description, string url)
@@ -239,6 +242,8 @@ namespace APSIM.Builds.Portal
     {
         public int ID;
         public string UserName;
+        public string PatchFileName;
+        public string PatchFileNameShort;
         public string PatchFileURL;
         public string Description;
         public int TaskID;
@@ -262,6 +267,9 @@ namespace APSIM.Builds.Portal
         public string LinuxBinariesURL;
         public string LinuxDiffsURL;
         public string LinuxDetailsURL;
+
+        public bool BuiltOnJenkins;
+        public int JenkinsID;
     }
 
 }

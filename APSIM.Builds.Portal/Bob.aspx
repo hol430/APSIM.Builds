@@ -69,7 +69,6 @@
                               GridLines="None" AutoGenerateColumns="False">
                     <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
                     <Columns>
-                        <asp:BoundField DataField="Action" HeaderText="Action" HtmlEncode="False"  />
                         <asp:BoundField DataField="User" HeaderText="User" />
                         <asp:BoundField DataField="PatchFile" HeaderText="Patch file" HtmlEncode="False" />
                         <asp:BoundField DataField="Description" HeaderText="Description"/>
