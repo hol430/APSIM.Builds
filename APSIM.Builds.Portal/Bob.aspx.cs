@@ -68,7 +68,7 @@ namespace APSIM.Builds.Portal
                 else if (buildJob.BuiltOnJenkins)
                     row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
 
-                if (statusText.Contains("Win32:Pass") || statusText.Contains("Win32:Fail"))
+                if (statusText.Contains("Win32:Pass"))
                 {
                     row["Duration"] = buildJob.Duration + "min";
                     row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL) + " " +
@@ -78,6 +78,11 @@ namespace APSIM.Builds.Portal
                                    HTMLLink("WindowsInstallerFull", buildJob.WindowsInstallerFullURL) + " " +
                                    HTMLLink("Win32 SFX", buildJob.Win32SFXURL) + " " +
                                    HTMLLink("Win64 SFX", buildJob.Win64SFXURL);
+                }
+                else if (statusText.Contains("Win32:Fail"))
+                {
+                    row["Duration"] = buildJob.Duration + "min";
+                    row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL);
                 }
                 data.Rows.Add(row);
             }
