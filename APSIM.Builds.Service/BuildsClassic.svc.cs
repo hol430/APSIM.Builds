@@ -545,6 +545,7 @@ namespace APSIM.Builds.Service
                                 buildJob.PatchFileNameShort = buildJob.PatchFileName;
                                 buildJob.WindowsDetailsURL = $"http://www.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
                                 buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
+                                buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}";
                             }
                             else
                             {
