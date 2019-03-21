@@ -46,7 +46,7 @@ namespace APSIM.Builds.Service
                         command.Parameters.Add(new SqlParameter("@PatchFileName", PatchFileName));
                         command.Parameters.Add(new SqlParameter("@Description", Description));
                         command.Parameters.Add(new SqlParameter("@BugID", BugID));
-                        command.Parameters.Add(new SqlParameter("@Status", "Queued"));
+                        command.Parameters.Add(new SqlParameter("@Status", "Running"));
                         command.Parameters.Add(new SqlParameter("@LinuxStatus", "Queued"));
                         command.Parameters.Add(new SqlParameter("@StartTime", NowString));
                         command.Parameters.Add(new SqlParameter("@JenkinsID", JenkinsID));
