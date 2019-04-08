@@ -582,9 +582,10 @@ namespace APSIM.Builds.Service
                                 buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
                                 if (buildJob.BuiltOnJenkins)
                                 {
-                                    buildJob.Win32SFXURL = filesURL + buildJob.PatchFileURL + ".binaries.WINDOWS.INTEL.exe";
-                                    buildJob.Win64SFXURL = filesURL + buildJob.PatchFileURL + ".binaries.WINDOWS.X86_64.exe";
+                                    buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
+                                    buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
                                 }
+                                else
                                 {
                                     buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
                                     buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
