@@ -1,6 +1,7 @@
 ﻿
 namespace APSIM.Builds.Service
 {
+    using Octokit;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -15,13 +16,24 @@ namespace APSIM.Builds.Service
                      Namespace = "http://www.apsim.info/services")]
     public class BuildsClassic : IBuildsClassic
     {
+        /// <summary>
+        /// Owner of the APSIM repository on GitHub.
+        /// </summary>
+        private const string repoOwner = "APSIMInitiative";
+
+        /// <summary>
+        /// Name of the APSIM repository on GitHub.
+        /// </summary>
+        private const string repoName = "APSIMClassic";
+
         /// <summary>Add a new entry to the builds database.</summary>
-        public void Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword)
+        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword)
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus) " +
-                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus)";
+                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus, JenkinsID) " +
+                             "Output Inserted.ID " +
+                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus, @JenkinsID)";
 
                 string NowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
 
@@ -34,17 +46,35 @@ namespace APSIM.Builds.Service
                         command.Parameters.Add(new SqlParameter("@PatchFileName", PatchFileName));
                         command.Parameters.Add(new SqlParameter("@Description", Description));
                         command.Parameters.Add(new SqlParameter("@BugID", BugID));
-                        command.Parameters.Add(new SqlParameter("@Status", "Queued"));
+                        command.Parameters.Add(new SqlParameter("@Status", "Running"));
                         command.Parameters.Add(new SqlParameter("@LinuxStatus", "Queued"));
                         command.Parameters.Add(new SqlParameter("@StartTime", NowString));
+                        command.Parameters.Add(new SqlParameter("@JenkinsID", JenkinsID));
                         if (DoCommit)
                             command.Parameters.Add(new SqlParameter("@DoCommit", "1"));
                         else
                             command.Parameters.Add(new SqlParameter("@DoCommit", "0"));
-                        command.ExecuteNonQuery();
+                        return (int)command.ExecuteScalar();
                     }
                 }
             }
+            return -1;
+        }
+
+        /// <summary>
+        /// Add a new entry to the builds database.
+        /// </summary>
+        public int AddPullRequest(int PullID, int JenkinsID, string Password, string DbConnectPassword)
+        {
+            PullRequest pull = GitHubUtilities.GetPullRequest(PullID, repoOwner, repoName);
+
+            string author = pull.User.Login;
+            string patchFileName = PullID.ToString(); // Use Pull Request ID as patch file names.
+            string description = pull.Title;
+            int issueId = pull.GetIssueID();
+            bool doCommit = false; // Legacy option.
+
+            return Add(author, Password, patchFileName, description, issueId, doCommit, JenkinsID, DbConnectPassword);
         }
 
         /// <summary>Return details about a specific job.</summary>
@@ -492,12 +522,15 @@ namespace APSIM.Builds.Service
 
                             BuildJob buildJob = new BuildJob();
                             buildJob.ID = (int)reader["ID"];
+                            buildJob.PatchFileName = reader["PatchFileName"]?.ToString();
                             buildJob.UserName = (string)reader["UserName"];
                             if (!Convert.IsDBNull(reader["RevisionNumber"]))
                                 buildJob.Revision = (int)reader["RevisionNumber"];
                             buildJob.StartTime = (DateTime)reader["StartTime"];
                             buildJob.TaskID = (int)reader["BugID"];
                             buildJob.Description = reader["Description"].ToString();
+                            buildJob.JenkinsID = (int)reader["JenkinsID"];
+                            buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
 
                             if (!Convert.IsDBNull(reader["FinishTime"]))
                             {
@@ -506,8 +539,23 @@ namespace APSIM.Builds.Service
                                 buildJob.Duration = Convert.ToInt32((finishTime - buildJob.StartTime).TotalMinutes);
                             }
 
-                            buildJob.PatchFileURL = "http://www.apsim.info/APSIM.Builds.Portal/Files/" + baseFileName + ".zip";
+                            if (buildJob.BuiltOnJenkins)
+                            {
+                                buildJob.PatchFileURL = filesURL + baseFileName + ".zip";
+                                buildJob.PatchFileNameShort = buildJob.PatchFileName;
+                                buildJob.WindowsDetailsURL = $"http://www.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
+                                buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
+                                buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}";
+                            }
+                            else
+                            {
+                                buildJob.PatchFileURL = filesURL + buildJob.PatchFileName;
+                                buildJob.PatchFileNameShort = GetShortPatchFileName((string)reader["PatchFileName"]);
+                                buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
+                                buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
+                            }
 
+                            
 
                             if (!Convert.IsDBNull(reader["NumDiffs"]))
                                 buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];
@@ -517,7 +565,6 @@ namespace APSIM.Builds.Service
 
                             buildJob.WindowsBinariesURL = filesURL + baseFileName + ".binaries.zip";
                             buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
-                            buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
 
 							string versionString;
 							if (buildJob.Revision < 3855)
@@ -533,8 +580,16 @@ namespace APSIM.Builds.Service
                             {
                                 buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe"; ;
                                 buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
-                                buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
-                                buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
+                                if (buildJob.BuiltOnJenkins)
+                                {
+                                    buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
+                                    buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
+                                }
+                                else
+                                {
+                                    buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
+                                    buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
+                                }
                             }
 
                             buildJob.WindowsStatus = (string)reader["Status"];
@@ -552,6 +607,15 @@ namespace APSIM.Builds.Service
                 }
             }
             return buildJobs.ToArray();
+        }
+
+        private string GetShortPatchFileName(string patchFileURL)
+        {
+            int posOpenBracket = patchFileURL.IndexOf('(');
+            if (posOpenBracket != -1)
+                return patchFileURL.Substring(0, posOpenBracket);
+            else
+                return patchFileURL;
         }
 
         /// <summary>Return a list of open bugs</summary>
@@ -603,6 +667,15 @@ namespace APSIM.Builds.Service
             return connectionString.Substring(posPassword + "Password=".Length);
         }
 
+        /// <summary>
+        /// Gets the ID of the issue referenced by a pull request.
+        /// </summary>
+        /// <param name="pullRequestID">ID of the pull request.</param>
+        public int GetIssueID(int pullRequestID)
+        {
+            PullRequest pull = GitHubUtilities.GetPullRequest(pullRequestID, repoOwner, repoName);
+            return pull.GetIssueID();
+        }
     }
 }
 

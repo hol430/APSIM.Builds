@@ -23,6 +23,7 @@
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <TargetFrameworkProfile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -82,6 +83,7 @@
     <Compile Include="IBuilds.cs" />
     <Compile Include="IBuildsClassic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="GitHubUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

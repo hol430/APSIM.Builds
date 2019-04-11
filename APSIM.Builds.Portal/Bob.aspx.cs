@@ -25,10 +25,12 @@ namespace APSIM.Builds.Portal
 
             GridView.DataSource = null;
             string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
+#if DEBUG
+            url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
+#endif
             BuildJob[] buildJobs = WebUtilities.CallRESTService<BuildJob[]>(url);
 
             DataTable data = new DataTable();
-            data.Columns.Add("Action", typeof(string));
             data.Columns.Add("User", typeof(string));
             data.Columns.Add("PatchFile", typeof(string));
             data.Columns.Add("Description", typeof(string));
@@ -42,24 +44,31 @@ namespace APSIM.Builds.Portal
             foreach (BuildJob buildJob in buildJobs)
             {
                 DataRow row = data.NewRow();
-                row["Action"] = HTMLLink("Delete", baseURL + "/DeleteJob.aspx?ID=" + buildJob.ID);
                 row["User"] = buildJob.UserName;
-                row["PatchFile"] = HTMLLink(GetShortPatchFile(buildJob.PatchFileURL), buildJob.PatchFileURL);
+
+                row["PatchFile"] = HTMLLink(buildJob.PatchFileNameShort, buildJob.PatchFileURL);
+
                 row["Description"] = buildJob.Description;
-                row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
+
+                if (buildJob.BuiltOnJenkins)
+                    row["Task"] = HTMLLink("#" + buildJob.TaskID, "https://github.com/APSIMInitiative/APSIMClassic/issues/" + buildJob.TaskID);
+                else
+                    row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
 
                 string statusText = "Win32:" + buildJob.WindowsStatus;
                 if (buildJob.WindowsNumDiffs > 0)
                     statusText += " (" + buildJob.WindowsNumDiffs + ")";
                 row["Status"] = HTMLLink(statusText, buildJob.WindowsDetailsURL) + " " +
-                                HTMLLink("(xml)", Path.ChangeExtension(buildJob.WindowsDetailsURL, ".xml")) + " " +
-                                HTMLLink("Linux64:" + buildJob.LinuxStatus, buildJob.LinuxDetailsURL);
+                                HTMLLink("(xml)", buildJob.XmlUrl);
 
                 row["StartTime"] = ((DateTime)buildJob.StartTime).ToString("dd MMM yyyy hh:mm tt");
+
                 if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
+                else if (buildJob.BuiltOnJenkins)
+                    row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
 
-                if (statusText.Contains("Win32:Pass") || statusText.Contains("Win32:Fail"))
+                if (statusText.Contains("Win32:Pass"))
                 {
                     row["Duration"] = buildJob.Duration + "min";
                     row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL) + " " +
@@ -70,6 +79,11 @@ namespace APSIM.Builds.Portal
                                    HTMLLink("Win32 SFX", buildJob.Win32SFXURL) + " " +
                                    HTMLLink("Win64 SFX", buildJob.Win64SFXURL);
                 }
+                else if (statusText.Contains("Win32:Fail"))
+                {
+                    row["Duration"] = buildJob.Duration + "min";
+                    row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL);
+                }
                 data.Rows.Add(row);
             }
 
@@ -79,10 +93,10 @@ namespace APSIM.Builds.Portal
             // Colour pass / fail cells.
             foreach (GridViewRow Row in GridView.Rows)
             {
-                if (Row.Cells[5].Text.Contains("Win32:Pass"))
-                    Row.Cells[5].BackColor = Color.PaleGreen;
-                else if (Row.Cells[5].Text.Contains("Win32:Fail"))
-                    Row.Cells[5].BackColor = Color.LightSalmon;
+                if (Row.Cells[4].Text.Contains("Win32:Pass"))
+                    Row.Cells[4].BackColor = Color.PaleGreen;
+                else if (Row.Cells[4].Text.Contains("Win32:Fail"))
+                    Row.Cells[4].BackColor = Color.LightSalmon;
             }
 
             PopulateChart();
@@ -115,7 +129,7 @@ namespace APSIM.Builds.Portal
             if (posLastSlash != -1 && posOpenBracket != -1)
                 return patchFileURL.Substring(posLastSlash + 1, posOpenBracket - posLastSlash - 1);
             else
-                return null;
+                return patchFileURL;
         }
 
         private string HTMLLink(string description, string url)
@@ -157,14 +171,14 @@ namespace APSIM.Builds.Portal
             List<Commiter> Commiters = new List<Commiter>();
             foreach (GridViewRow Row in GridView.Rows)
             {
-                string Author = Row.Cells[1].Text;
+                string Author = Row.Cells[0].Text;
                 Commiter Commiter = Commiters.Find(delegate (Commiter C) { return C.Author == Author; });
                 if (Commiter == null)
                 {
                     Commiter = new Commiter() { Author = Author };
                     Commiters.Add(Commiter);
                 }
-                if (Row.Cells[5].Text.Contains("Pass"))
+                if (Row.Cells[4].Text.Contains("Pass"))
                     Commiter.NumPasses++;
                 else
                     Commiter.NumFailures++;
@@ -236,12 +250,15 @@ namespace APSIM.Builds.Portal
     {
         public int ID;
         public string UserName;
+        public string PatchFileName;
+        public string PatchFileNameShort;
         public string PatchFileURL;
         public string Description;
         public int TaskID;
         public DateTime StartTime;
         public int Duration;
         public int Revision;
+        public string XmlUrl;
 
         public string WindowsStatus;
         public int WindowsNumDiffs;
@@ -259,6 +276,9 @@ namespace APSIM.Builds.Portal
         public string LinuxBinariesURL;
         public string LinuxDiffsURL;
         public string LinuxDetailsURL;
+
+        public bool BuiltOnJenkins;
+        public int JenkinsID;
     }
 
 }

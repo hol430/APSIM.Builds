@@ -5,8 +5,8 @@
     using System;
     using System.IO;
     using System.Text;
-    using System.Threading.Tasks;
-    using System.Web.Script.Serialization;
+    using APSIM.Builds;
+    using Octokit.Internal;
 
     public partial class GitHubPullRequestForm : System.Web.UI.Page
     {
@@ -18,36 +18,67 @@
         protected void Page_Load(object sender, EventArgs e)
         {
             string json = GetJsonFromInputStream();
-
-            var serializer = new JavaScriptSerializer();
-            GitHub gitHub = serializer.Deserialize<GitHub>(json);
-
-            if (gitHub == null || gitHub.pull_request == null)
-                ShowMessage("Cannot find pull request in GitHub JSON.");
-            else if (gitHub.pull_request.merged == false)
-                ShowMessage("Pull request not merged - ignored");
-            else if (gitHub.pull_request.IssueNumber == -1)
-                ShowMessage("Pull request doesn't reference an issue.");
-            else
+            if (string.IsNullOrWhiteSpace(json))
             {
-                string issueNumber = gitHub.pull_request.IssueNumber.ToString();
-                string pullId = gitHub.pull_request.number.ToString();
-                string author = gitHub.pull_request.Author;
-                string token = GetJenkinsToken();
-                string issueTitle = gitHub.pull_request.IssueTitle;
-                string released = gitHub.pull_request.ResolvesIssue.ToString().ToLower();
-                string jenkinsUrl = string.Format(@"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={0}&ISSUE_NUMBER={1}&PULL_ID={2}&COMMIT_AUTHOR={3}&ISSUE_TITLE={4}&RELEASED={5}", token, issueNumber, pullId, author, issueTitle, released).Replace(" ", "%20");
-                WebUtilities.CallRESTService<object>(jenkinsUrl);
-                ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", gitHub.pull_request.Author, gitHub.pull_request.number, gitHub.pull_request.Title));
+                Response.StatusCode = 200;
+                return;
+            }
+
+            SimpleJsonSerializer octokitSerialiser = new SimpleJsonSerializer();
+            PullRequestEventPayload payload = octokitSerialiser.Deserialize<PullRequestEventPayload>(json);
+
+            if (payload == null || payload.PullRequest == null)
+            {
+                ShowMessage("Cannot find pull request in GitHub JSON.");
+                Response.StatusCode = 400; // Bad request
+            }
+            else if (!payload.PullRequest.Merged)
+                ShowMessage("Pull request not merged - ignored");
+            else if (payload.PullRequest.GetIssueID() == -1)
+                ShowMessage("Pull request doesn't reference an issue.");
+            else if (payload.Repository.Owner.Login == "APSIMInitiative")
+            {
+                if (payload.Repository.Name == "ApsimX")
+                {
+                    // If an ApsimX Pull Request has been merged, start a CreateInstallation job on Jenkins.
+                    string issueNumber = payload.PullRequest.GetIssueID().ToString();
+                    string pullId = payload.PullRequest.Number.ToString();
+                    string author = payload.PullRequest.User.Login;
+                    string token = GetJenkinsToken();
+                    string issueTitle = payload.PullRequest.GetIssueTitle("APSIMInitiative", "ApsimX");
+                    bool released = payload.PullRequest.FixesAnIssue();
+                    string jenkinsUrl = $"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={token}&ISSUE_NUMBER={issueNumber}&PULL_ID={pullId}&COMMIT_AUTHOR={author}&ISSUE_TITLE={issueTitle}&RELEASED={released}";
+                    WebUtilities.CallRESTService<object>(jenkinsUrl);
+                    ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", author, pullId, payload.PullRequest.Title));
+                }
+                else if (payload.Repository.Name == "APSIMClassic")
+                {
+                    // If an ApsimX Pull Request has been created, add the build to the builds DB.
+                    string username = payload.PullRequest.User.Login;
+                    string password = GetClassicBuildPassword();
+                    string patchFileName = payload.PullRequest.Number.ToString();
+                    string description = payload.PullRequest.Title;
+                    string bugID = payload.PullRequest.GetIssueID().ToString();
+                    bool doCommit = false;
+                    string dbConnectPassword = GetValidPassword();
+                    string url = $"https://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add?UserName={username}&Password={password}&PatchFileName={patchFileName}&Description={description}&BugID={bugID}&DoCommit={doCommit}&DbConnectPassword={dbConnectPassword}";
+                    WebUtilities.CallRESTService<object>(url);
+                    ShowMessage($"Added pull request #{payload.PullRequest.Number} ({description}) to APSIM.Builds.Classic database.");
+                }
             }
         }
 
         /// <summary>Return the valid password for this web service.</summary>
-        public static string GetValidPassword()
+        private static string GetValidPassword()
         {
             string connectionString = File.ReadAllText(@"D:\Websites\ChangeDBPassword.txt");
             int posPassword = connectionString.IndexOf("Password=");
             return connectionString.Substring(posPassword + "Password=".Length);
+        }
+
+        private static string GetClassicBuildPassword()
+        {
+            return File.ReadAllText(@"D:\Websites\ClassicBuildPassword.txt");
         }
 
         private string GetJenkinsToken()
@@ -84,130 +115,6 @@
             Response.ContentEncoding = System.Text.Encoding.UTF8;
             Response.Write(msg);
             Response.End();
-        }
-    }
-
-    /// <summary>
-    /// A class for deserialising the top level JSON from GitHub
-    /// </summary>
-    public class GitHub
-    {
-        public PullRequest pull_request;
-
-    }
-
-    /// <summary>
-    /// A class for deserialising the pull request JSON object.
-    /// </summary>
-    public class PullRequest
-    {
-        public int number;
-        public bool merged;
-        public string body;
-        public string issue_url;
-
-        /// <summary>
-        /// Returns a resolved issue number or -1 if not found.
-        /// </summary>
-        public int IssueNumber
-        {
-            get
-            {
-                int posResolves = body.IndexOf("Resolves", StringComparison.InvariantCultureIgnoreCase);
-                if (posResolves == -1)
-                    posResolves = body.IndexOf("Working on", StringComparison.InvariantCultureIgnoreCase);
-
-                if (posResolves != -1)
-                {
-                    int posHash = body.IndexOf("#", posResolves);
-                    if (posHash != -1)
-                    {
-                        int issueID = 0;
-
-                        int posSpace = body.IndexOfAny(new char[] { ' ', '\r', '\n',
-                                                                           '\t', '.', ';',
-                                                                           ':', '+', '&', ',' }, posHash);
-                        if (posSpace == -1)
-                            posSpace = body.Length;
-                        if (posSpace != -1)
-                            if (Int32.TryParse(body.Substring(posHash + 1, posSpace - posHash - 1), out issueID))
-                                return issueID;
-                    }
-                }
-
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if pull request resolves an issue
-        /// </summary>
-        public bool ResolvesIssue
-        {
-            get
-            {
-                string stringToMatch = "Resolves #" + IssueNumber;
-                return body.IndexOf(stringToMatch, StringComparison.CurrentCultureIgnoreCase) != -1;
-            }
-        }
-
-        /// <summary>
-        /// Returns the issue title.
-        /// </summary>
-        public string IssueTitle
-        {
-            get
-            {
-                if (IssueNumber != -1)
-                {
-                    GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-                    string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
-                    github.Credentials = new Credentials(token);
-                    Task<Issue> issueTask = github.Issue.Get("APSIMInitiative", "ApsimX", IssueNumber);
-                    issueTask.Wait();
-                    return issueTask.Result.Title;
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns the title of the pull request.
-        /// </summary>
-        public string Title
-        {
-            get
-            {
-                if (IssueNumber != -1)
-                {
-                    GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-                    string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
-                    github.Credentials = new Credentials(token);
-                    Task<Octokit.PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", number);
-                    pullRequestTask.Wait();
-                    return pullRequestTask.Result.Title;
-                }
-
-                return null;
-            }
-        }
-
-        public string Author
-        {
-            get
-            {
-                if (IssueNumber != -1)
-                {
-                    GitHubClient github = new GitHubClient(new ProductHeaderValue("ApsimX"));
-                    string token = File.ReadAllText(@"D:\Websites\GitHubToken.txt");
-                    github.Credentials = new Credentials(token);
-                    Task<Octokit.PullRequest> pullRequestTask = github.PullRequest.Get("APSIMInitiative", "ApsimX", number);
-                    pullRequestTask.Wait();
-                    return pullRequestTask.Result.User.Login;
-                }
-                return null;
-            }
         }
     }
 }

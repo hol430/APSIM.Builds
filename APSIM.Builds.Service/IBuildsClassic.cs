@@ -10,9 +10,15 @@
     {
         /// <summary>Add a new entry to the builds database.</summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&DbConnectPassword={DbConnectPassword}", 
+        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&JenkinsID={JenkinsID}&DbConnectPassword={DbConnectPassword}", 
                 BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        void Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, string DbConnectPassword);
+        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword);
+
+        /// <summary>Add a new entry to the builds database.</summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/AddPullRequest?PullID={PullID}&JenkinsID={JenkinsID}&Password={Password}&DbConnectPassword={DbConnectPassword}",
+                BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int AddPullRequest(int PullID, int JenkinsID, string Password, string DbConnectPassword);
 
         /// <summary>Return details about a specific job.</summary>
         [OperationContract]
@@ -128,6 +134,13 @@
         [WebGet(UriTemplate = "/GetIssueList")]
         BugTracker[] GetIssueList();
 
+        /// <summary>
+        /// Gets the ID of the issue referenced by a pull request.
+        /// </summary>
+        /// <param name="pullRequestID">ID of the pull request.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int GetIssueID(int pullRequestID);
     }
 
 
@@ -136,12 +149,15 @@
     {
         public int ID;
         public string UserName;
+        public string PatchFileName;
+        public string PatchFileNameShort;
         public string PatchFileURL;
         public string Description;
         public int TaskID;
         public DateTime StartTime;
         public int Duration;
         public int Revision;
+        public string XmlUrl;
 
         public string WindowsStatus;
         public int WindowsNumDiffs;
@@ -159,6 +175,9 @@
         public string LinuxBinariesURL;
         public string LinuxDiffsURL;
         public string LinuxDetailsURL;
+
+        public bool BuiltOnJenkins;
+        public int JenkinsID;
     }
 
     /// <summary>A bug</summary>
