@@ -111,7 +111,7 @@ namespace APSIM.Builds.Service
             DateTime issueResolvedDate;
             if (!DateTime.TryParseExact(dateFromVersion, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out issueResolvedDate))
                 throw new Exception(string.Format("Date is not in a valid format: {0}.", dateFromVersion));
-            return GetUpgradesSinceDate(issueResolvedDate).Where(u => u.issueNumber != issueNumber).ToList();
+            return GetUpgradesSinceDate(issueResolvedDate).Where(u => u.IssueNumber != issueNumber).ToList();
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace APSIM.Builds.Service
             DateTime date = GetIssueResolvedDate(issueNumber);
             // We need to filter the list of all upgrades to remove any upgrades which are on the same day and
             // fix the same issue.
-            return GetUpgradesSinceDate(date).Where(u => u.issueNumber != issueNumber || u.ReleaseDate.DayOfYear != date.DayOfYear).ToList();
+            return GetUpgradesSinceDate(date).Where(u => u.IssueNumber != issueNumber || u.ReleaseDate.DayOfYear != date.DayOfYear).ToList();
         }
 
         /// <summary>
@@ -152,11 +152,11 @@ namespace APSIM.Builds.Service
                             bool released = (bool)reader["Released"];
                             if (buildIssueNumber > 0)
                             {
-                                if (upgrades.Find(u => u.issueNumber == buildIssueNumber) == null && released)
+                                if (upgrades.Find(u => u.IssueNumber == buildIssueNumber) == null && released)
                                 {
                                     Upgrade upgrade = new Upgrade();
                                     upgrade.ReleaseDate = (DateTime)reader["Date"];
-                                    upgrade.issueNumber = buildIssueNumber;
+                                    upgrade.IssueNumber = buildIssueNumber;
                                     upgrade.IssueTitle = (string)reader["IssueTitle"];
                                     upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
                                     upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
