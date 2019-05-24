@@ -318,6 +318,16 @@ namespace APSIM.Builds.Service
                 html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
             }
 
+            foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
+            {
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
+                docURL = docURL.Replace('\\', '/');
+
+                string modelName = Path.GetFileNameWithoutExtension(file);
+                modelName = modelName.Replace(latestBuild.issueNumber.ToString(), "");
+                html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
+            }
+
             // Add in extra docs.
             html += "<h2>Utility Documentation</h2>";
             html += "<a href=\"https://www.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
