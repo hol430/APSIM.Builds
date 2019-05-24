@@ -304,7 +304,7 @@ namespace APSIM.Builds.Service
             html += "</head><body>";
             Build latestBuild = GetLatestBuild();
 
-            html += "<h2>Documentation for build <a href=\"https://github.com/APSIMInitiative/ApsimX/issues/" + latestBuild.issueNumber + "\">" +
+            html += "<h2>Auto Generated Model Documentation for build <a href=\"https://github.com/APSIMInitiative/ApsimX/issues/" + latestBuild.issueNumber + "\">" +
                      latestBuild.issueNumber + "</a> " + latestBuild.date.ToLongDateString() + "</h2>";
 
             string pattern = "*" + latestBuild.issueNumber + ".pdf";
@@ -319,8 +319,12 @@ namespace APSIM.Builds.Service
             }
 
             // Add in extra docs.
+            html += "<h2>Utility Documentation</h2>";
             html += "<a href=\"https://www.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
             html += "<a href=\"https://www.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\" target=\"_blank\"> Memo</a><br/>" + Environment.NewLine;
+
+            html += "<h2>Science Documentation</h2>";
+            html += "<a href=\"http://www.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
 
             html += "</body></html>";
 
