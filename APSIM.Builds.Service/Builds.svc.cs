@@ -318,6 +318,7 @@ namespace APSIM.Builds.Service
                 html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
             }
 
+            html += "<h2>Under Review Models</h2>";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
             {
                 string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
