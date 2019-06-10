@@ -318,6 +318,7 @@ namespace APSIM.Builds.Service
                 html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
             }
 
+            html += "<h2>Under Review Models</h2>";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
             {
                 string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
@@ -335,7 +336,7 @@ namespace APSIM.Builds.Service
 
             html += "<h2>Science Documentation</h2>";
             html += "<a href=\"http://www.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
-
+            html += "<a href=\"http://www.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
             html += "</body></html>";
 
             return new MemoryStream(Encoding.UTF8.GetBytes(html));
