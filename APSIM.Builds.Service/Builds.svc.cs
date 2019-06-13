@@ -286,6 +286,15 @@ namespace APSIM.Builds.Service
             return null;
         }
 
+        /// <summary>
+        /// Gets the version number of the latest build/upgrade.
+        /// </summary>
+        public string GetLatestVersion()
+        {
+            Build latest = GetLatestBuild();
+            return latest.date.ToString("yyyy.MM.dd.") + latest.issueNumber;
+        }
+
         /// <summary>Get latest documentation HTML.</summary>
         public Stream GetDocumentationHTML()
         {

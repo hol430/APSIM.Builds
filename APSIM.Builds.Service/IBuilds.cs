@@ -57,6 +57,13 @@ namespace APSIM.Builds.Service
         string GetURLOfLatestVersion(string operatingSystem);
 
         /// <summary>
+        /// Gets the version number of the latest build/upgrade.
+        /// </summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetLatestVersion", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        string GetLatestVersion();
+
+        /// <summary>
         /// Gets a URL for a version that resolves the specified issue
         /// </summary>
         /// <param name="issueNumber">The issue number.</param>
