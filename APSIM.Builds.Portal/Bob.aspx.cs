@@ -24,7 +24,7 @@ namespace APSIM.Builds.Portal
             string files = baseURL + "/files/";
 
             GridView.DataSource = null;
-            string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
+            string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #if DEBUG
             url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #endif
@@ -53,7 +53,7 @@ namespace APSIM.Builds.Portal
                 if (buildJob.BuiltOnJenkins)
                     row["Task"] = HTMLLink("#" + buildJob.TaskID, "https://github.com/APSIMInitiative/APSIMClassic/issues/" + buildJob.TaskID);
                 else
-                    row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://www.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
+                    row["Task"] = HTMLLink("T" + buildJob.TaskID, "http://apsimdev.apsim.info/BugTracker/edit_bug.aspx?id=" + buildJob.TaskID);
 
                 string statusText = "Win32:" + buildJob.WindowsStatus;
                 if (buildJob.WindowsNumDiffs > 0)

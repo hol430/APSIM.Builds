@@ -16,7 +16,7 @@ namespace APSIM.Builds.Portal
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetIssueList";
+            string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetIssueList";
             bugs = WebUtilities.CallRESTService<BugTracker[]>(url);
 
             foreach (BugTracker bug in bugs)
@@ -46,7 +46,7 @@ namespace APSIM.Builds.Portal
                 FileUpload.FileContent.CopyTo(ZipFile);
                 ZipFile.Close();
 
-                string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add" +
+                string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add" +
                              "?UserName=" + UserNameTextBox.Text +
                              "&Password=" + PasswordTextBox.Text +
                              "&PatchFileName=" + Path.GetFileName(FileNameToWrite) +
