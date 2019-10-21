@@ -13,7 +13,7 @@ namespace APSIM.Builds.Service
     using System.Text;
 
     [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any, 
-                     Namespace = "http://www.apsim.info/services")]
+                     Namespace = "http://apsimdev.apsim.info/services")]
     public class BuildsClassic : IBuildsClassic
     {
         /// <summary>
@@ -109,7 +109,7 @@ namespace APSIM.Builds.Service
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
-                            return "http://www.apsim.info/APSIM.Builds.Portal/Files/" + reader["PatchFileName"].ToString();
+                            return "http://apsimdev.apsim.info/APSIM.Builds.Portal/Files/" + reader["PatchFileName"].ToString();
                         else
                             return null;
                     }
@@ -543,7 +543,7 @@ namespace APSIM.Builds.Service
                             {
                                 buildJob.PatchFileURL = filesURL + baseFileName + ".zip";
                                 buildJob.PatchFileNameShort = buildJob.PatchFileName;
-                                buildJob.WindowsDetailsURL = $"http://www.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
+                                buildJob.WindowsDetailsURL = $"http://apsimdev.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
                                 buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
                                 buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}";
                             }

@@ -159,7 +159,7 @@ namespace APSIM.Builds.Service
                                     upgrade.IssueNumber = buildIssueNumber;
                                     upgrade.IssueTitle = (string)reader["IssueTitle"];
                                     upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                                    upgrade.ReleaseURL = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
+                                    upgrade.ReleaseURL = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
                                     upgrades.Add(upgrade);
                                 }
                             }
@@ -190,7 +190,7 @@ namespace APSIM.Builds.Service
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
-                            return @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + issueNumber + ".exe";
+                            return @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + issueNumber + ".exe";
                     }
                 }
             }
@@ -276,7 +276,7 @@ namespace APSIM.Builds.Service
                             build.pullRequestID = (int)reader["PullRequestID"]; ;
                             build.issueNumber = (int)reader["IssueNumber"];
                             build.issueTitle = (string)reader["IssueTitle"];
-                            build.url = @"http://www.apsim.info/ApsimXFiles/ApsimSetup" + build.issueNumber + ".exe";
+                            build.url = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + build.issueNumber + ".exe";
                             return build;
                         }
                     }
@@ -319,7 +319,7 @@ namespace APSIM.Builds.Service
             string pattern = "*" + latestBuild.issueNumber + ".pdf";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles", pattern))
             {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
                 docURL = docURL.Replace('\\', '/');
 
                 string modelName = Path.GetFileNameWithoutExtension(file);
@@ -330,7 +330,7 @@ namespace APSIM.Builds.Service
             html += "<h2>Under Review Models</h2>";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
             {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://www.apsim.info");
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
                 docURL = docURL.Replace('\\', '/');
 
                 string modelName = Path.GetFileNameWithoutExtension(file);
@@ -340,12 +340,12 @@ namespace APSIM.Builds.Service
 
             // Add in extra docs.
             html += "<h2>Utility Documentation</h2>";
-            html += "<a href=\"https://www.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
-            html += "<a href=\"https://www.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\" target=\"_blank\"> Memo</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://apsimdev.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://apsimdev.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\" target=\"_blank\"> Memo</a><br/>" + Environment.NewLine;
 
             html += "<h2>Science Documentation</h2>";
-            html += "<a href=\"http://www.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
-            html += "<a href=\"http://www.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
+            html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
+            html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
             html += "</body></html>";
 
             return new MemoryStream(Encoding.UTF8.GetBytes(html));

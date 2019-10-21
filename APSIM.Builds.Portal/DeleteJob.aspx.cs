@@ -14,7 +14,7 @@
 
         protected void Yes_Click(object sender, EventArgs e)
         {
-            string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/DeleteJob" +
+            string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/DeleteJob" +
              "?JobID=" + JobID +
              "&DbConnectPassword=" + Bob.GetValidPassword();
             WebUtilities.CallRESTService<object>(url);

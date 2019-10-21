@@ -7,7 +7,7 @@
     {
         protected void Button1_Click(object sender, EventArgs e)
         {
-            string url = "http://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/UpdateStatus" +
+            string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/UpdateStatus" +
                          "?JobID=" + JobID.Text +
                          "&NewStatus=" + NewStatus.Text +
                          "&DbConnectPassword=" + Bob.GetValidPassword();

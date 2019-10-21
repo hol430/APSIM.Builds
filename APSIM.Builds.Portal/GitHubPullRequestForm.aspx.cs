@@ -47,7 +47,7 @@
                     string token = GetJenkinsToken();
                     string issueTitle = payload.PullRequest.GetIssueTitle("APSIMInitiative", "ApsimX");
                     bool released = payload.PullRequest.FixesAnIssue();
-                    string jenkinsUrl = $"http://www.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={token}&ISSUE_NUMBER={issueNumber}&PULL_ID={pullId}&COMMIT_AUTHOR={author}&ISSUE_TITLE={issueTitle}&RELEASED={released}";
+                    string jenkinsUrl = $"http://apsimdev.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={token}&ISSUE_NUMBER={issueNumber}&PULL_ID={pullId}&COMMIT_AUTHOR={author}&ISSUE_TITLE={issueTitle}&RELEASED={released}";
                     WebUtilities.CallRESTService<object>(jenkinsUrl);
                     ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", author, pullId, payload.PullRequest.Title));
                 }
@@ -61,7 +61,7 @@
                     string bugID = payload.PullRequest.GetIssueID().ToString();
                     bool doCommit = false;
                     string dbConnectPassword = GetValidPassword();
-                    string url = $"https://www.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add?UserName={username}&Password={password}&PatchFileName={patchFileName}&Description={description}&BugID={bugID}&DoCommit={doCommit}&DbConnectPassword={dbConnectPassword}";
+                    string url = $"https://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add?UserName={username}&Password={password}&PatchFileName={patchFileName}&Description={description}&BugID={bugID}&DoCommit={doCommit}&DbConnectPassword={dbConnectPassword}";
                     WebUtilities.CallRESTService<object>(url);
                     ShowMessage($"Added pull request #{payload.PullRequest.Number} ({description}) to APSIM.Builds.Classic database.");
                 }
