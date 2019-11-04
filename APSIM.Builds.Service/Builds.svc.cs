@@ -1,7 +1,7 @@
 ﻿
 namespace APSIM.Builds.Service
 {
-    using Shared.Utilities;
+    using APSIM.Shared;
     using Octokit;
     using System;
     using System.Collections.Generic;
@@ -339,10 +339,6 @@ namespace APSIM.Builds.Service
             }
 
             // Add in extra docs.
-            html += "<h2>Utility Documentation</h2>";
-            html += "<a href=\"https://apsimdev.apsim.info/Report.aspx\" target=\"_blank\">Report</a><br/>" + Environment.NewLine;
-            html += "<a href=\"https://apsimdev.apsim.info/Documentation/APSIM(nextgeneration)/Memo.aspx\" target=\"_blank\"> Memo</a><br/>" + Environment.NewLine;
-
             html += "<h2>Science Documentation</h2>";
             html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
             html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
