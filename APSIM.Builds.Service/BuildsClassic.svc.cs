@@ -507,7 +507,7 @@ namespace APSIM.Builds.Service
                          " FROM Classic " +
                          " ORDER BY ID DESC";
 
-            string filesURL = "http://bob.apsim.info/files/";
+            string filesURL = "https://apsimdev.apsim.info/APSIMClassicFiles/";
 
             List<BuildJob> buildJobs = new List<BuildJob>();
             using (SqlConnection connection = Open())
