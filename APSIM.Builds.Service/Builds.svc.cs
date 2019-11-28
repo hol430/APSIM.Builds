@@ -342,6 +342,7 @@ namespace APSIM.Builds.Service
             html += "<h2>Science Documentation</h2>";
             html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
             html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
+            html += "<a href=\"https://grazplan.csiro.au/wp-content/uploads/2007/08/TechPaperMay12.pdf\" target =\"_blank\">Stock Science</a>";
             html += "</body></html>";
 
             return new MemoryStream(Encoding.UTF8.GetBytes(html));
