@@ -341,10 +341,23 @@ namespace APSIM.Builds.Service
             // Add in extra docs.
             html += "<h2>Science Documentation</h2>";
             html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
-            html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a>";
-            html += "<a href=\"https://grazplan.csiro.au/wp-content/uploads/2007/08/TechPaperMay12.pdf\" target =\"_blank\">Stock Science</a>";
+            html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://grazplan.csiro.au/wp-content/uploads/2007/08/TechPaperMay12.pdf\" target =\"_blank\">Stock Science</a><br/>" + Environment.NewLine;
             html += "</body></html>";
 
+            return new MemoryStream(Encoding.UTF8.GetBytes(html));
+        }
+
+        /// <summary>Get documentation HTML for the specified version.</summary>
+        /// <param name="apsimVersion">The version to get the doc for. Can be null for latest version.</param>
+        public Stream GetDocumentationHTMLForVersion(string apsimVersion)
+        {
+            if (apsimVersion == null)
+                apsimVersion = GetLatestVersion();
+
+            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html; charset=utf-8";
+            var indexFileName = @"D:\Websites\ApsimX\Releases\" + apsimVersion + @"\index.html";
+            string html = File.ReadAllText(indexFileName);
             return new MemoryStream(Encoding.UTF8.GetBytes(html));
         }
 
