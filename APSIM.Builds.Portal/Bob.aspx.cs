@@ -71,11 +71,12 @@ namespace APSIM.Builds.Portal
                 if (statusText.Contains("Win32:Pass"))
                 {
                     row["Duration"] = buildJob.Duration + "min";
+                    // Ignore binaries, build tree and windows bootleg, as these are no longer used.
                     row["Links"] = HTMLLink("Win32 Diffs", buildJob.WindowsDiffsURL) + " " +
-                                   HTMLLink("Binaries", buildJob.WindowsBinariesURL) + " " +
-                                   HTMLLink("BuildTree", buildJob.WindowsBuildTreeURL) + " " +
+                                   //HTMLLink("Binaries", buildJob.WindowsBinariesURL) + " " +
+                                   //HTMLLink("BuildTree", buildJob.WindowsBuildTreeURL) + " " +
                                    HTMLLink("WindowsInstaller", buildJob.WindowsInstallerURL) + " " +
-                                   HTMLLink("WindowsInstallerFull", buildJob.WindowsInstallerFullURL) + " " +
+                                   //HTMLLink("WindowsInstallerFull", buildJob.WindowsInstallerFullURL) + " " +
                                    HTMLLink("Win32 SFX", buildJob.Win32SFXURL) + " " +
                                    HTMLLink("Win64 SFX", buildJob.Win64SFXURL);
                 }
