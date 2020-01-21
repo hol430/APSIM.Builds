@@ -1,7 +1,6 @@
 ﻿
 namespace APSIM.Builds.Service
 {
-    using APSIM.Shared;
     using Octokit;
     using System;
     using System.Collections.Generic;
