@@ -318,7 +318,7 @@ namespace APSIM.Builds.Service
             string pattern = "*" + latestBuild.issueNumber + ".pdf";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles", pattern))
             {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "https://apsimdev.apsim.info");
                 docURL = docURL.Replace('\\', '/');
 
                 string modelName = Path.GetFileNameWithoutExtension(file);
@@ -329,7 +329,7 @@ namespace APSIM.Builds.Service
             html += "<h2>Under Review Models</h2>";
             foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
             {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
+                string docURL = file.Replace(@"D:\WebSites\APSIM", "https://apsimdev.apsim.info");
                 docURL = docURL.Replace('\\', '/');
 
                 string modelName = Path.GetFileNameWithoutExtension(file);
@@ -339,8 +339,8 @@ namespace APSIM.Builds.Service
 
             // Add in extra docs.
             html += "<h2>Science Documentation</h2>";
-            html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
-            html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
+            html += "<a href=\"https://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a><br/>" + Environment.NewLine;
             html += "<a href=\"https://grazplan.csiro.au/wp-content/uploads/2007/08/TechPaperMay12.pdf\" target =\"_blank\">Stock Science</a><br/>" + Environment.NewLine;
             html += "</body></html>";
 
