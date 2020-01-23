@@ -294,59 +294,6 @@ namespace APSIM.Builds.Service
             return latest.date.ToString("yyyy.MM.dd.") + latest.issueNumber;
         }
 
-        /// <summary>Get latest documentation HTML.</summary>
-        public Stream GetDocumentationHTML()
-        {
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html; charset=utf-8";
-            string html = "<html><head>" + Environment.NewLine;
-            html += "<link rel=\"shortcut icon\" href=\"https://apsimnextgeneration.netlify.com/images/favicon.png\" type=\"image/x-icon\" />" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/css/nucleus.css\" rel=\"stylesheet\" >" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/css/font-awesome.min.css\" rel=\"stylesheet\">" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/css/hybrid.css\" rel=\"stylesheet\">" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/css/featherlight.min.css\" rel=\"stylesheet\">" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/css/auto-complete.css\" rel=\"stylesheet\" >" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/theme-original/style.css\" rel=\"stylesheet\">" +
-                    "<link href=\"https://apsimnextgeneration.netlify.com/theme-original/variant-darkgreen.css\" rel=\"stylesheet\">" +
-                    "<link rel=\"stylesheet\" href=\"https://apsimnextgeneration.netlify.com/css/bootstrap.min.css\" >";
-
-            html += "</head><body>";
-            Build latestBuild = GetLatestBuild();
-
-            html += "<h2>Auto Generated Model Documentation for build <a href=\"https://github.com/APSIMInitiative/ApsimX/issues/" + latestBuild.issueNumber + "\">" +
-                     latestBuild.issueNumber + "</a> " + latestBuild.date.ToLongDateString() + "</h2>";
-
-            string pattern = "*" + latestBuild.issueNumber + ".pdf";
-            foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles", pattern))
-            {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
-                docURL = docURL.Replace('\\', '/');
-
-                string modelName = Path.GetFileNameWithoutExtension(file);
-                modelName = modelName.Replace(latestBuild.issueNumber.ToString(), "");
-                html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
-            }
-
-            html += "<h2>Under Review Models</h2>";
-            foreach (string file in Directory.GetFiles(@"D:\WebSites\APSIM\ApsimxFiles\UnderReview", pattern))
-            {
-                string docURL = file.Replace(@"D:\WebSites\APSIM", "http://apsimdev.apsim.info");
-                docURL = docURL.Replace('\\', '/');
-
-                string modelName = Path.GetFileNameWithoutExtension(file);
-                modelName = modelName.Replace(latestBuild.issueNumber.ToString(), "");
-                html += "<a href=\"" + docURL + "\" target=\"_blank\">" + modelName + "</a><br/>" + Environment.NewLine;
-            }
-
-            // Add in extra docs.
-            html += "<h2>Science Documentation</h2>";
-            html += "<a href=\"http://apsimdev.apsim.info/Portals/0/Documentation/ApsimX/AgPastureScience.pdf\" target =\"_blank\"> AgPasture Science</a><br/>" + Environment.NewLine;
-            html += "<a href=\"http://apsimdev.apsim.info/CLEM/Content/Home.htm\" target=\"_blank\">CLEM</a><br/>" + Environment.NewLine;
-            html += "<a href=\"https://grazplan.csiro.au/wp-content/uploads/2007/08/TechPaperMay12.pdf\" target =\"_blank\">Stock Science</a><br/>" + Environment.NewLine;
-            html += "</body></html>";
-
-            return new MemoryStream(Encoding.UTF8.GetBytes(html));
-        }
-
         /// <summary>Get documentation HTML for the specified version.</summary>
         /// <param name="apsimVersion">The version to get the doc for. Can be null for latest version.</param>
         public Stream GetDocumentationHTMLForVersion(string apsimVersion)

@@ -78,13 +78,6 @@ namespace APSIM.Builds.Service
         [WebGet(UriTemplate = "/GetPullRequestDetails?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         string GetPullRequestDetails(int pullRequestID);
 
-        /// <summary>
-        /// Get latest documentation HTML.
-        /// </summary>
-        [OperationContract]
-        [WebGet(UriTemplate = "/GetDocumentationHTML", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        Stream GetDocumentationHTML();
-
         /// <summary>Get documentation HTML for the specified version.</summary>
         /// <param name="apsimVersion">The version to get the doc for. Can be null for latest version.</param>
         [OperationContract]
