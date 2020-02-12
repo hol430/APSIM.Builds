@@ -1,5 +1,6 @@
 ﻿namespace APSIM.Builds.Service
 {
+    using APSIM.Shared.Web;
     using System;
     using System.Collections.Generic;
     using System.ServiceModel;
@@ -141,43 +142,6 @@
         [OperationContract]
         [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         int GetIssueID(int pullRequestID);
-    }
-
-
-    /// <summary>A class for holding info about an APSIM classic build.</summary>
-    public class BuildJob
-    {
-        public int ID;
-        public string UserName;
-        public string PatchFileName;
-        public string PatchFileNameShort;
-        public string PatchFileURL;
-        public string Description;
-        public int TaskID;
-        public DateTime StartTime;
-        public int Duration;
-        public int Revision;
-        public string XmlUrl;
-
-        public string WindowsStatus;
-        public int WindowsNumDiffs;
-        public string WindowsBinariesURL;
-        public string WindowsBuildTreeURL;
-        public string WindowsDiffsURL;
-        public string WindowsDetailsURL;
-        public string WindowsInstallerURL;
-        public string WindowsInstallerFullURL;
-        public string Win32SFXURL;
-        public string Win64SFXURL;
-
-        public string LinuxStatus;
-        public int LinuxNumDiffs;
-        public string LinuxBinariesURL;
-        public string LinuxDiffsURL;
-        public string LinuxDetailsURL;
-
-        public bool BuiltOnJenkins;
-        public int JenkinsID;
     }
 
     /// <summary>A bug</summary>

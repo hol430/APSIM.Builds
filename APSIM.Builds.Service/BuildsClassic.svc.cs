@@ -1,6 +1,7 @@
 ﻿
 namespace APSIM.Builds.Service
 {
+    using APSIM.Shared.Web;
     using Octokit;
     using System;
     using System.Collections.Generic;
@@ -498,12 +499,12 @@ namespace APSIM.Builds.Service
         {
             string sql;
             if (PassOnly)
-                sql = "SELECT TOP (" + NumRows.ToString() + ") * " +
+                sql = "SELECT TOP (@NumRows) * " +
                          " FROM Classic " +
                          " WHERE Status = 'Pass'" +
                          " ORDER BY ID DESC";
             else
-                sql = "SELECT TOP (" + NumRows.ToString() + ") * " +
+                sql = "SELECT TOP (@NumRows) * " +
                          " FROM Classic " +
                          " ORDER BY ID DESC";
 
@@ -514,6 +515,7 @@ namespace APSIM.Builds.Service
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.Add(new SqlParameter("@NumRows", NumRows));
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
