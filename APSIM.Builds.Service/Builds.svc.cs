@@ -14,7 +14,7 @@ namespace APSIM.Builds.Service
     using System.Text;
     using System.Threading.Tasks;
     using System.Globalization;
-
+    using APSIM.Shared.Web;
 
     /// <summary>
     /// Web service that provides access to the ApsimX builds system.

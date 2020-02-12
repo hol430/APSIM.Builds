@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using APSIM.Shared.Web;
 
 namespace APSIM.Builds.Service
 {
@@ -84,31 +85,4 @@ namespace APSIM.Builds.Service
         [WebGet(UriTemplate = "/GetDocumentationHTMLForVersion?version={version}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         Stream GetDocumentationHTMLForVersion(string version = null);
     }
-
-    /// <summary>
-    /// An class encapsulating an upgrade 
-    /// </summary>
-    public class Upgrade
-    {
-        public DateTime ReleaseDate { get; set; }
-        public int IssueNumber { get; set; }
-        public string IssueTitle { get; set; }
-        public string IssueURL { get; set; }
-        public string ReleaseURL { get; set; }
-
-        // Leaving this here for compatibility reasons.
-        [Obsolete("Deprecated in favour of IssueNumber.")]
-        public int issueNumber
-        {
-            get
-            {
-                return IssueNumber;
-            }
-            set
-            {
-                IssueNumber = value;
-            }
-        }
-    }
-
 }
