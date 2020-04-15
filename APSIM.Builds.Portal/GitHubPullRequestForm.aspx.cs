@@ -53,17 +53,19 @@
                 }
                 else if (payload.Repository.Name == "APSIMClassic")
                 {
-                    // If an ApsimX Pull Request has been created, add the build to the builds DB.
-                    string username = payload.PullRequest.User.Login;
-                    string password = GetClassicBuildPassword();
-                    string patchFileName = payload.PullRequest.Number.ToString();
-                    string description = payload.PullRequest.Title;
-                    string bugID = payload.PullRequest.GetIssueID().ToString();
-                    bool doCommit = false;
-                    string dbConnectPassword = GetValidPassword();
-                    string url = $"https://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/Add?UserName={username}&Password={password}&PatchFileName={patchFileName}&Description={description}&BugID={bugID}&DoCommit={doCommit}&DbConnectPassword={dbConnectPassword}";
-                    WebUtilities.CallRESTService<object>(url);
-                    ShowMessage($"Added pull request #{payload.PullRequest.Number} ({description}) to APSIM.Builds.Classic database.");
+                    // If an APSIM Classic Pull Request has been created, and it fixes an issue, start a ReleaseClassic job on Jenkins
+                    string pullId = payload.PullRequest.Number.ToString();
+                    string author = payload.PullRequest.User.Login;
+                    if (payload.PullRequest.FixesAnIssue())
+                    {
+                        string token = GetJenkinsToken();
+                        string sha = payload.PullRequest.MergeCommitSha;
+                        string jenkinsUrl = $"http://apsimdev.apsim.info:8080/jenkins/job/ReleaseClassic/buildWithParameters?token={token}&PULL_ID={pullId}&SHA1={sha}";
+                        WebUtilities.CallRESTService<object>(jenkinsUrl);
+                        ShowMessage($"Triggered a deploy step for {author}'s pull request #{pullId} - {payload.PullRequest.Title}");
+                    }
+                    else
+                        ShowMessage($"No release will be generated {author}'s pull request #{pullId} - {payload.PullRequest.Title} as it doesn't resolve an issue");
                 }
             }
         }

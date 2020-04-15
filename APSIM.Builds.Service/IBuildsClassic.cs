@@ -96,6 +96,11 @@
         [WebGet(UriTemplate = "/UpdateRevisionNumber?JobID={JobID}&RevisionNumber={RevisionNumber}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         void UpdateRevisionNumber(int JobID, int RevisionNumber, string DbConnectPassword);
 
+        /// <summary>Update the revision number for the specified pull request.</summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/UpdateRevisionNumberForPR?pullRequestID={pullRequestID}&revisionNumber={revisionNumber}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        void UpdateRevisionNumberForPR(int pullRequestID, int revisionNumber, string DbConnectPassword);
+
         /// <summary>Update the paths for all the revision number for the specified build job.</summary>
         [OperationContract]
         [WebGet(UriTemplate = "/UpdateDiffFileName?JobID={JobID}&DiffsFileName={DiffsFileName}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
@@ -142,6 +147,11 @@
         [OperationContract]
         [WebGet(UriTemplate = "/GetIssueID?pullRequestID={pullRequestID}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         int GetIssueID(int pullRequestID);
+
+        /// <summary>Get the latest revision number.</summary>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetLatestRevisionNo", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        int GetLatestRevisionNo();
     }
 
     /// <summary>A bug</summary>
