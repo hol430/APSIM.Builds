@@ -710,7 +710,6 @@ namespace APSIM.Builds.Service
 
             using (SqlConnection connection = Open())
             {
-                connection.Open();
                 try
                 {
                     using (SqlCommand command = new SqlCommand(sql, connection))
