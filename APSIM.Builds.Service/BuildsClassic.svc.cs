@@ -365,6 +365,25 @@ namespace APSIM.Builds.Service
             }
         }
 
+        /// <summary>Update the revision number for the specified pull request.</summary>
+        public void UpdateRevisionNumberForPR(int pullRequestID, int revisionNumber, string DbConnectPassword)
+        {
+            if (DbConnectPassword == GetValidPassword())
+            {
+                string SQL = "UPDATE Classic SET RevisionNumber = @RevisionNumber WHERE pullRequestID = @PullRequestID";
+
+                using (SqlConnection connection = Open())
+                {
+                    using (SqlCommand command = new SqlCommand(SQL, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@RevisionNumber", revisionNumber));
+                        command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestID));
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
         /// <summary>Update the paths for all the revision number for the specified build job.</summary>
         public void UpdateDiffFileName(int JobID, string DiffsFileName, string DbConnectPassword)
         {
@@ -533,6 +552,7 @@ namespace APSIM.Builds.Service
                             buildJob.Description = reader["Description"].ToString();
                             buildJob.JenkinsID = (int)reader["JenkinsID"];
                             buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
+                            buildJob.WindowsStatus = (string)reader["Status"];
 
                             if (!Convert.IsDBNull(reader["FinishTime"]))
                             {
@@ -541,13 +561,14 @@ namespace APSIM.Builds.Service
                                 buildJob.Duration = Convert.ToInt32((finishTime - buildJob.StartTime).TotalMinutes);
                             }
 
-                            if (buildJob.BuiltOnJenkins)
+                            if (buildJob.BuiltOnJenkins /*&& buildJob.Revision != 0*/)
                             {
                                 buildJob.PatchFileURL = filesURL + baseFileName + ".zip";
                                 buildJob.PatchFileNameShort = buildJob.PatchFileName;
                                 buildJob.WindowsDetailsURL = $"http://apsimdev.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
                                 buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
                                 buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}";
+                                buildJob.IssueURL = $"https://github.com/APSIMInitiative/APSIMClassic/issues/{buildJob.TaskID}";
                             }
                             else
                             {
@@ -555,9 +576,8 @@ namespace APSIM.Builds.Service
                                 buildJob.PatchFileNameShort = GetShortPatchFileName((string)reader["PatchFileName"]);
                                 buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
                                 buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
+                                buildJob.IssueURL = $"http://apsimdev.apsim.info/BugTracker/edit_bug.aspx?id={buildJob.TaskID}";
                             }
-
-                            
 
                             if (!Convert.IsDBNull(reader["NumDiffs"]))
                                 buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];
@@ -578,9 +598,11 @@ namespace APSIM.Builds.Service
                             else
                                 versionString = "Apsim7.10-r";
 
-                            if (buildJob.WindowsNumDiffs == 0)
+                            buildJob.VersionString = versionString + buildJob.Revision;
+
+                            if (buildJob.WindowsNumDiffs == 0 && buildJob.WindowsStatus == "Pass")
                             {
-                                buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe"; ;
+                                buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe";
                                 buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
                                 if (buildJob.BuiltOnJenkins)
                                 {
@@ -594,7 +616,6 @@ namespace APSIM.Builds.Service
                                 }
                             }
 
-                            buildJob.WindowsStatus = (string)reader["Status"];
 
                             buildJob.LinuxBinariesURL = filesURL + versionString + buildJob.Revision + ".LINUX.X86_64.exe";
                             buildJob.LinuxDetailsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
@@ -677,6 +698,32 @@ namespace APSIM.Builds.Service
         {
             PullRequest pull = GitHubUtilities.GetPullRequest(pullRequestID, repoOwner, repoName);
             return pull.GetIssueID();
+        }
+
+        /// <summary>
+        /// Get the latest revision number.
+        /// </summary>
+        /// <returns></returns>
+        public int GetLatestRevisionNo()
+        {
+            string sql = "SELECT TOP 1 RevisionNumber FROM Classic ORDER BY RevisionNumber DESC;";
+
+            using (SqlConnection connection = Open())
+            {
+                try
+                {
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                        using (SqlDataReader reader = command.ExecuteReader())
+                            if (reader.Read())
+                                return (int)reader["RevisionNumber"];
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            throw new Exception("Unable to get latest revision number.");
         }
     }
 }
