@@ -437,6 +437,25 @@ namespace APSIM.Builds.Service
             }
         }
 
+        /// <summary>Update the patch file name for the given pull request.</summary>
+        public void UpdatePatchFileName(int pullRequestID, string patchFileName, string DbConnectPassword)
+        {
+            if (DbConnectPassword == GetValidPassword())
+            {
+                string sql = "UPDATE Classic SET PatchFileName = @PatchFileName WHERE PullRequestID = @PullRequestID";
+                using (SqlConnection connection = Open())
+                {
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@PatchFileName", patchFileName);
+                        command.Parameters.AddWithValue("@PullRequestID", pullRequestID);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
         /// <summary>Find the next job to run.</summary>
         public int FindNextJob()
         {
@@ -553,6 +572,8 @@ namespace APSIM.Builds.Service
                             buildJob.JenkinsID = (int)reader["JenkinsID"];
                             buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
                             buildJob.WindowsStatus = (string)reader["Status"];
+                            // PullRequestID will be null for the old Bob builds. This will be converted to 0.
+                            buildJob.PullRequestID = Convert.ToInt32(reader["PullRequestID"]);
 
                             if (!Convert.IsDBNull(reader["FinishTime"]))
                             {
@@ -563,12 +584,14 @@ namespace APSIM.Builds.Service
 
                             if (buildJob.BuiltOnJenkins /*&& buildJob.Revision != 0*/)
                             {
-                                buildJob.PatchFileURL = filesURL + baseFileName + ".zip";
+                                buildJob.PatchFileURL = filesURL + buildJob.PullRequestID + ".zip";
                                 buildJob.PatchFileNameShort = buildJob.PatchFileName;
                                 buildJob.WindowsDetailsURL = $"http://apsimdev.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
-                                buildJob.XmlUrl = filesURL + buildJob.PatchFileName + ".xml";
-                                buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}";
+                                buildJob.XmlUrl = filesURL + buildJob.PullRequestID + ".xml";
+                                buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}";
                                 buildJob.IssueURL = $"https://github.com/APSIMInitiative/APSIMClassic/issues/{buildJob.TaskID}";
+                                buildJob.WindowsBinariesURL = filesURL + buildJob.PullRequestID + ".binaries.zip";
+                                buildJob.WindowsBuildTreeURL = filesURL + buildJob.PullRequestID + ".buildtree.zip";
                             }
                             else
                             {
@@ -577,16 +600,15 @@ namespace APSIM.Builds.Service
                                 buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
                                 buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
                                 buildJob.IssueURL = $"http://apsimdev.apsim.info/BugTracker/edit_bug.aspx?id={buildJob.TaskID}";
+                                buildJob.WindowsBinariesURL = filesURL + baseFileName + ".binaries.zip";
+                                buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
                             }
 
                             if (!Convert.IsDBNull(reader["NumDiffs"]))
                                 buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];
 
                             if (buildJob.WindowsNumDiffs > 0)
-                                buildJob.WindowsDiffsURL = filesURL + baseFileName + ".diffs.zip";
-
-                            buildJob.WindowsBinariesURL = filesURL + baseFileName + ".binaries.zip";
-                            buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
+                                buildJob.WindowsDiffsURL = filesURL + buildJob.PullRequestID + ".diffs.zip";
 
 							string versionString;
 							if (buildJob.Revision < 3855)
@@ -602,20 +624,21 @@ namespace APSIM.Builds.Service
 
                             if (buildJob.WindowsNumDiffs == 0 && buildJob.WindowsStatus == "Pass")
                             {
-                                buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe";
-                                buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
                                 if (buildJob.BuiltOnJenkins)
                                 {
                                     buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
                                     buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
+                                    buildJob.WindowsInstallerFullURL = filesURL + buildJob.PatchFileName + ".bootleg.exe";
+                                    buildJob.WindowsInstallerURL = filesURL + buildJob.PatchFileName + ".apsimsetup.exe";
                                 }
                                 else
                                 {
                                     buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
                                     buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
+                                    buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe";
+                                    buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
                                 }
                             }
-
 
                             buildJob.LinuxBinariesURL = filesURL + versionString + buildJob.Revision + ".LINUX.X86_64.exe";
                             buildJob.LinuxDetailsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
