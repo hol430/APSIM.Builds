@@ -73,7 +73,7 @@
 
         /// <summary>Update the patch file name for the given pull request.</summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/UpdateStatus?pullRequestID={pullRequestID}&patchFileName={patchFileName}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        [WebGet(UriTemplate = "/UpdatePatchFileName?pullRequestID={pullRequestID}&patchFileName={patchFileName}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         void UpdatePatchFileName(int pullRequestID, string patchFileName, string DbConnectPassword);
 
         /// <summary>Update the status of the specified build job.</summary>
