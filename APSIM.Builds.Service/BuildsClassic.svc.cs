@@ -437,6 +437,25 @@ namespace APSIM.Builds.Service
             }
         }
 
+        /// <summary>Update the patch file name for the given pull request.</summary>
+        public void UpdatePatchFileName(int pullRequestID, string patchFileName, string DbConnectPassword)
+        {
+            if (DbConnectPassword == GetValidPassword())
+            {
+                string sql = "UPDATE Classic SET PatchFileName = @PatchFileName WHERE PullRequestID = @PullRequestID";
+                using (SqlConnection connection = Open())
+                {
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@PatchFileName", patchFileName);
+                        command.Parameters.AddWithValue("@PullRequestID", pullRequestID);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
         /// <summary>Find the next job to run.</summary>
         public int FindNextJob()
         {
