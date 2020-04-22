@@ -50,6 +50,14 @@ namespace APSIM.Builds.Service
         List<Upgrade> GetUpgradesSinceVersion(string version);
 
         /// <summary>
+        /// Gets the N most recent upgrades.
+        /// </summary>
+        /// <param name="n">Number of upgrades to fetch.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetLastNUpgrades?n={n}", BodyStyle = WebMessageBodyStyle.WrappedResponse)]
+        List<Upgrade> GetLastNUpgrades(int n);
+
+        /// <summary>
         /// Gets the URL of the latest version.
         /// </summary>
         /// <returns>The URL of the latest version of APSIM Next Generation.</returns>

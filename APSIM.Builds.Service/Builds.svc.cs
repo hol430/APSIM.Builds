@@ -114,6 +114,27 @@ namespace APSIM.Builds.Service
         }
 
         /// <summary>
+        /// Gets the N most recent upgrades.
+        /// </summary>
+        /// <param name="n">Number of upgrades to fetch.</param>
+        public List<Upgrade> GetLastNUpgrades(int n)
+        {
+            using (SqlConnection connection = BuildsClassic.Open())
+            {
+                using (SqlCommand command = new SqlCommand("SELECT TOP @NumRows * FROM ApsimX ORDER BY Date DESC;", connection))
+                {
+                    if (n > 0)
+                        command.Parameters.AddWithValue("@NumRows", n);
+                    else
+                        command.CommandText = "SELECT * FROM ApsimX ORDER BY Date DESC;";
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                        return GetUpgrades(reader);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
         /// </summary>
         /// <param name="issueNumber">The issue number.</param>
@@ -145,24 +166,30 @@ namespace APSIM.Builds.Service
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
-                            int buildIssueNumber = (int)reader["IssueNumber"];
-                            bool released = (bool)reader["Released"];
-                            if (buildIssueNumber > 0)
-                            {
-                                if (upgrades.Find(u => u.IssueNumber == buildIssueNumber) == null && released)
-                                {
-                                    Upgrade upgrade = new Upgrade();
-                                    upgrade.ReleaseDate = (DateTime)reader["Date"];
-                                    upgrade.IssueNumber = buildIssueNumber;
-                                    upgrade.IssueTitle = (string)reader["IssueTitle"];
-                                    upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                                    upgrade.ReleaseURL = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-                                    upgrades.Add(upgrade);
-                                }
-                            }
-                        }
+                        return GetUpgrades(reader);
+                    }
+                }
+            }
+        }
+
+        private List<Upgrade> GetUpgrades(SqlDataReader reader)
+        {
+            List<Upgrade> upgrades = new List<Upgrade>();
+            while (reader.Read())
+            {
+                int buildIssueNumber = (int)reader["IssueNumber"];
+                bool released = (bool)reader["Released"];
+                if (buildIssueNumber > 0)
+                {
+                    if (upgrades.Find(u => u.IssueNumber == buildIssueNumber) == null && released)
+                    {
+                        Upgrade upgrade = new Upgrade();
+                        upgrade.ReleaseDate = (DateTime)reader["Date"];
+                        upgrade.IssueNumber = buildIssueNumber;
+                        upgrade.IssueTitle = (string)reader["IssueTitle"];
+                        upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
+                        upgrade.ReleaseURL = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
+                        upgrades.Add(upgrade);
                     }
                 }
             }
