@@ -157,13 +157,14 @@ namespace APSIM.Builds.Service
             List<Upgrade> upgrades = new List<Upgrade>();
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date) +
+                         "WHERE Date >= @Date" +
                          " ORDER BY Date DESC";
 
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@Date", string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date));
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         return GetUpgrades(reader);
@@ -207,12 +208,13 @@ namespace APSIM.Builds.Service
             DateTime issueResolvedDate = GetIssueResolvedDate(issueNumber);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber;
+                         "WHERE IssueNumber = @IssueNumber";
 
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@IssueNumber", issueNumber);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -249,12 +251,13 @@ namespace APSIM.Builds.Service
             DateTime resolvedDate = new DateTime(2015, 1, 1);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber +
+                         "WHERE IssueNumber = @IssueNumber" +
                          "ORDER BY Date DESC";
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@IssueNumber", issueNumber);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
