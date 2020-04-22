@@ -82,12 +82,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetStatus(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -102,12 +103,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetPatchFileName(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -122,12 +124,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetRevisionNumber(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -142,12 +145,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetUserName(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -164,12 +168,13 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+                string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@JobID", JobID);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
@@ -186,12 +191,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetDescription(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -206,12 +212,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetBugID(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -226,12 +233,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public int GetNumDiffs(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -248,12 +256,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public int GetDoCommit(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -270,11 +279,14 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET Status = '" + NewStatus + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET Status = @Status WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Status", NewStatus);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -286,11 +298,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET " + FieldName + " = '" + FieldValue + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET @FieldName = @FieldValue WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@FieldName", FieldName);
+                        command.Parameters.AddWithValue("@FieldValue", FieldValue);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -302,11 +318,14 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET LinuxStatus = '" + NewStatus + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET LinuxStatus = @NewStatus WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@NewStatus", NewStatus);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+                        
                         command.ExecuteNonQuery();
                     }
                 }
@@ -319,12 +338,15 @@ namespace APSIM.Builds.Service
             if (DbConnectPassword == GetValidPassword())
             {
                 string nowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
-                string SQL = "UPDATE Classic SET StartTime = '" + nowString + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET StartTime = @Now WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Now", nowString);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -337,12 +359,15 @@ namespace APSIM.Builds.Service
             if (DbConnectPassword == GetValidPassword())
             {
                 string nowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
-                string SQL = "UPDATE Classic SET FinishTime = '" + nowString + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET FinishTime = @Now WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Now", nowString);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -354,12 +379,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET RevisionNumber = " + RevisionNumber.ToString() + " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET RevisionNumber = @RevisionNumber WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@RevisionNumber", RevisionNumber);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -390,13 +418,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET DiffsFileName = '" + DiffsFileName + "'" +
-                                                " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET DiffsFileName = @DiffsFileName WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@DiffsFileName", DiffsFileName);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -408,12 +438,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET NumDiffs = " + NumDiffs.ToString() + " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET NumDiffs = @NumDiffs WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@NumDiffs", NumDiffs);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -425,13 +458,16 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET " + FieldName + " = '" + FieldValue + "'" +
-                                                " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET @FieldName = @FieldValue WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@FieldName", FieldName);
+                        command.Parameters.AddWithValue("@FieldValue", FieldValue);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -482,12 +518,11 @@ namespace APSIM.Builds.Service
         public int FindNextLinuxJob()
         {
             int JobID = -1;
+            string sql = "SELECT ID FROM Classic WHERE Status = 'Pass' AND LinuxStatus = 'Queued' ORDER BY ID";
             using (SqlConnection connection = Open())
             {
                 MarkFailedJobs(connection);
-                using (SqlCommand command = new SqlCommand(
-                                                         "SELECT ID FROM Classic WHERE Status = 'Pass' AND LinuxStatus = 'Queued' ORDER BY ID",
-                                                         connection))
+                using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -522,11 +557,13 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "DELETE FROM Classic WHERE ID = " + JobNumber.ToString();
+                string SQL = "DELETE FROM Classic WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@JobID", JobNumber);
+
                         command.ExecuteNonQuery();
                     }
                 }
