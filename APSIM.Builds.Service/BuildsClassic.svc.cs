@@ -28,13 +28,13 @@ namespace APSIM.Builds.Service
         private const string repoName = "APSIMClassic";
 
         /// <summary>Add a new entry to the builds database.</summary>
-        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword)
+        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, int PullID, string DbConnectPassword)
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus, JenkinsID) " +
+                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus, JenkinsID, PullRequestID) " +
                              "Output Inserted.ID " +
-                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus, @JenkinsID)";
+                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus, @JenkinsID, @PullID)";
 
                 string NowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
 
@@ -51,6 +51,7 @@ namespace APSIM.Builds.Service
                         command.Parameters.Add(new SqlParameter("@LinuxStatus", "Queued"));
                         command.Parameters.Add(new SqlParameter("@StartTime", NowString));
                         command.Parameters.Add(new SqlParameter("@JenkinsID", JenkinsID));
+                        command.Parameters.Add(new SqlParameter("@PullID", PullID));
                         if (DoCommit)
                             command.Parameters.Add(new SqlParameter("@DoCommit", "1"));
                         else
@@ -75,7 +76,7 @@ namespace APSIM.Builds.Service
             int issueId = pull.GetIssueID();
             bool doCommit = false; // Legacy option.
 
-            return Add(author, Password, patchFileName, description, issueId, doCommit, JenkinsID, DbConnectPassword);
+            return Add(author, Password, patchFileName, description, issueId, doCommit, JenkinsID, PullID, DbConnectPassword);
         }
 
         /// <summary>Return details about a specific job.</summary>
@@ -572,8 +573,9 @@ namespace APSIM.Builds.Service
                             buildJob.JenkinsID = (int)reader["JenkinsID"];
                             buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
                             buildJob.WindowsStatus = (string)reader["Status"];
-                            // PullRequestID will be null for the old Bob builds. This will be converted to 0.
-                            buildJob.PullRequestID = Convert.ToInt32(reader["PullRequestID"]);
+                            // PullRequestID will be null for the old Bob builds.
+                            if (!Convert.IsDBNull(reader["PullRequestID"]))
+                                buildJob.PullRequestID = Convert.ToInt32(reader["PullRequestID"]);
 
                             if (!Convert.IsDBNull(reader["FinishTime"]))
                             {

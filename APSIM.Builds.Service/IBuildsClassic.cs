@@ -11,9 +11,9 @@
     {
         /// <summary>Add a new entry to the builds database.</summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&JenkinsID={JenkinsID}&DbConnectPassword={DbConnectPassword}", 
+        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&JenkinsID={JenkinsID}&PullID={PullID}&DbConnectPassword={DbConnectPassword}", 
                 BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword);
+        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, int PullID, string DbConnectPassword);
 
         /// <summary>Add a new entry to the builds database.</summary>
         [OperationContract]
