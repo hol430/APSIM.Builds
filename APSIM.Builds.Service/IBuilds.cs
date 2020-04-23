@@ -54,7 +54,7 @@ namespace APSIM.Builds.Service
         /// </summary>
         /// <param name="n">Number of upgrades to fetch.</param>
         [OperationContract]
-        [WebGet(UriTemplate = "/GetLastNUpgrades?n={n}", BodyStyle = WebMessageBodyStyle.WrappedResponse)]
+        [WebGet(UriTemplate = "/GetLastNUpgrades?n={n}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         List<Upgrade> GetLastNUpgrades(int n);
 
         /// <summary>
