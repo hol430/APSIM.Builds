@@ -170,7 +170,7 @@ namespace APSIM.Builds.Service
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@Date", string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date));
+                    command.Parameters.AddWithValue("@Date", date.ToString("yyyy-MM-ddTHH:mm:ss"));
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         return GetUpgrades(reader);
