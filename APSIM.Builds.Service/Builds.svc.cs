@@ -94,6 +94,9 @@ namespace APSIM.Builds.Service
         /// <returns>List of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceVersion(string version)
         {
+            if (string.IsNullOrEmpty(version))
+                return GetAllUpgrades();
+
             int issueNumber = 0;
 
             int lastDotPosition = version.LastIndexOf(".");
@@ -141,6 +144,9 @@ namespace APSIM.Builds.Service
         /// <returns>The list of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceIssue(int issueNumber)
         {
+            if (issueNumber <= 0)
+                return GetAllUpgrades();
+
             DateTime date = GetIssueResolvedDate(issueNumber);
             // We need to filter the list of all upgrades to remove any upgrades which are on the same day and
             // fix the same issue.
@@ -171,6 +177,14 @@ namespace APSIM.Builds.Service
                     }
                 }
             }
+        }
+
+        private List<Upgrade> GetAllUpgrades()
+        {
+            using (SqlConnection connection = BuildsClassic.Open())
+                using (SqlCommand command = new SqlCommand("SELECT * FROM ApsimX ORDER BY Date DESC;", connection))
+                    using (SqlDataReader reader = command.ExecuteReader())
+                        return GetUpgrades(reader);
         }
 
         private List<Upgrade> GetUpgrades(SqlDataReader reader)
