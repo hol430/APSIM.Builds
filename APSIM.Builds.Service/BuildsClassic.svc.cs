@@ -665,10 +665,13 @@ namespace APSIM.Builds.Service
                             {
                                 if (buildJob.BuiltOnJenkins)
                                 {
-                                    buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
-                                    buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
-                                    buildJob.WindowsInstallerFullURL = filesURL + buildJob.PatchFileName + ".bootleg.exe";
-                                    buildJob.WindowsInstallerURL = filesURL + buildJob.PatchFileName + ".apsimsetup.exe";
+                                    if (buildJob.Revision != 0)
+                                    {
+                                        buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
+                                        buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
+                                        buildJob.WindowsInstallerFullURL = filesURL + buildJob.PatchFileName + ".bootleg.exe";
+                                        buildJob.WindowsInstallerURL = filesURL + buildJob.PatchFileName + ".apsimsetup.exe";
+                                    }
                                 }
                                 else
                                 {

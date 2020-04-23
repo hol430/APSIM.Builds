@@ -64,10 +64,15 @@ namespace APSIM.Builds.Portal
 
                 row["StartTime"] = ((DateTime)buildJob.StartTime).ToString("dd MMM yyyy hh:mm tt");
 
-                if (buildJob.Revision > 0)
+                if (buildJob.BuiltOnJenkins)
+                {
+                    if (buildJob.Revision > 0)
+                        row["Revision"] = HTMLLink($"#{buildJob.Revision}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                    else
+                        row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                }
+                else if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
-                else if (buildJob.BuiltOnJenkins)
-                    row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
 
                 if (statusText.Contains("Win32:Pass"))
                 {
