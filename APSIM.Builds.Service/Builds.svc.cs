@@ -265,7 +265,7 @@ namespace APSIM.Builds.Service
             DateTime resolvedDate = new DateTime(2015, 1, 1);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = @IssueNumber" +
+                         "WHERE IssueNumber = @IssueNumber " +
                          "ORDER BY Date DESC";
             using (SqlConnection connection = BuildsClassic.Open())
             {
