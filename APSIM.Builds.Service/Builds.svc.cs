@@ -124,7 +124,7 @@ namespace APSIM.Builds.Service
         {
             using (SqlConnection connection = BuildsClassic.Open())
             {
-                using (SqlCommand command = new SqlCommand("SELECT TOP @NumRows * FROM ApsimX ORDER BY Date DESC;", connection))
+                using (SqlCommand command = new SqlCommand("SELECT TOP (@NumRows) * FROM ApsimX WHERE Released = 1 ORDER BY Date DESC;", connection))
                 {
                     if (n > 0)
                         command.Parameters.AddWithValue("@NumRows", n);
