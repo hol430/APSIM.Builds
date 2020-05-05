@@ -140,6 +140,12 @@
         [WebGet(UriTemplate = "/GetJobs?NumRows={NumRows}&PassOnly={PassOnly}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         BuildJob[] GetJobs(int NumRows, bool PassOnly);
 
+        /// <summary>Return a list of build jobs which have been released.</summary>
+        /// <param name="numRows">Maximum number of results.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetReleases?numRows={numRows}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        BuildJob[] GetReleases(int numRows);
+
         /// <summary>Return a list of open bugs</summary>
         [OperationContract]
         [WebGet(UriTemplate = "/GetIssueList")]
