@@ -399,16 +399,20 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "SELECT TOP (1) ID FROM Classic WHERE PullRequestID = @PullID ORDER BY ID DESC;";
+                int jobID = GetIDOfLatestBuild(pullRequestID);
+                UpdateRevisionNumber(jobID, revisionNumber, DbConnectPassword);
+            }
+        }
 
-                using (SqlConnection connection = Open())
+        private int GetIDOfLatestBuild(int pullID)
+        {
+            using (SqlConnection connection = Open())
+            {
+                string sql = "SELECT TOP (1) ID FROM Classic WHERE PullRequestID = @PullID ORDER BY ID DESC;";
+                using (SqlCommand command = new SqlCommand(sql, connection))
                 {
-                    using (SqlCommand command = new SqlCommand(SQL, connection))
-                    {
-                        command.Parameters.AddWithValue("@PullID", pullRequestID);
-                        int jobID = Convert.ToInt32(command.ExecuteScalar());
-                        UpdateRevisionNumber(jobID, revisionNumber, DbConnectPassword);
-                    }
+                    command.Parameters.AddWithValue("@PullID", pullID);
+                    return Convert.ToInt32(command.ExecuteScalar());
                 }
             }
         }
@@ -479,13 +483,14 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string sql = "UPDATE Classic SET PatchFileName = @PatchFileName WHERE PullRequestID = @PullRequestID";
+                int jobID = GetIDOfLatestBuild(pullRequestID);
+                string sql = "UPDATE Classic SET PatchFileName = @PatchFileName WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@PatchFileName", patchFileName);
-                        command.Parameters.AddWithValue("@PullRequestID", pullRequestID);
+                        command.Parameters.AddWithValue("@JobID", jobID);
 
                         command.ExecuteNonQuery();
                     }
