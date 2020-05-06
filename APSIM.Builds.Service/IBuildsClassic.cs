@@ -11,9 +11,9 @@
     {
         /// <summary>Add a new entry to the builds database.</summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&JenkinsID={JenkinsID}&DbConnectPassword={DbConnectPassword}", 
+        [WebGet(UriTemplate = "/Add?UserName={UserName}&Password={Password}&PatchFileName={PatchFileName}&Description={Description}&BugID={BugID}&DoCommit={DoCommit}&JenkinsID={JenkinsID}&PullID={PullID}&DbConnectPassword={DbConnectPassword}", 
                 BodyStyle = WebMessageBodyStyle.WrappedRequest)]
-        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword);
+        int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, int PullID, string DbConnectPassword);
 
         /// <summary>Add a new entry to the builds database.</summary>
         [OperationContract]
@@ -73,7 +73,7 @@
 
         /// <summary>Update the patch file name for the given pull request.</summary>
         [OperationContract]
-        [WebGet(UriTemplate = "/UpdateStatus?pullRequestID={pullRequestID}&patchFileName={patchFileName}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        [WebGet(UriTemplate = "/UpdatePatchFileName?pullRequestID={pullRequestID}&patchFileName={patchFileName}&DbConnectPassword={DbConnectPassword}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         void UpdatePatchFileName(int pullRequestID, string patchFileName, string DbConnectPassword);
 
         /// <summary>Update the status of the specified build job.</summary>
@@ -139,6 +139,12 @@
         [OperationContract]
         [WebGet(UriTemplate = "/GetJobs?NumRows={NumRows}&PassOnly={PassOnly}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
         BuildJob[] GetJobs(int NumRows, bool PassOnly);
+
+        /// <summary>Return a list of build jobs which have been released.</summary>
+        /// <param name="numRows">Maximum number of results.</param>
+        [OperationContract]
+        [WebGet(UriTemplate = "/GetReleases?numRows={numRows}", BodyStyle = WebMessageBodyStyle.WrappedRequest)]
+        BuildJob[] GetReleases(int numRows);
 
         /// <summary>Return a list of open bugs</summary>
         [OperationContract]

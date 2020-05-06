@@ -94,6 +94,9 @@ namespace APSIM.Builds.Service
         /// <returns>List of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceVersion(string version)
         {
+            if (string.IsNullOrEmpty(version))
+                return GetAllUpgrades();
+
             int issueNumber = 0;
 
             int lastDotPosition = version.LastIndexOf(".");
@@ -114,12 +117,36 @@ namespace APSIM.Builds.Service
         }
 
         /// <summary>
+        /// Gets the N most recent upgrades.
+        /// </summary>
+        /// <param name="n">Number of upgrades to fetch.</param>
+        public List<Upgrade> GetLastNUpgrades(int n)
+        {
+            using (SqlConnection connection = BuildsClassic.Open())
+            {
+                using (SqlCommand command = new SqlCommand("SELECT TOP (@NumRows) * FROM ApsimX WHERE Released = 1 ORDER BY Date DESC;", connection))
+                {
+                    if (n > 0)
+                        command.Parameters.AddWithValue("@NumRows", n);
+                    else
+                        command.CommandText = "SELECT * FROM ApsimX ORDER BY Date DESC;";
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                        return GetUpgrades(reader);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a list of possible upgrades since the specified issue number.
         /// </summary>
         /// <param name="issueNumber">The issue number.</param>
         /// <returns>The list of possible upgrades.</returns>
         public List<Upgrade> GetUpgradesSinceIssue(int issueNumber)
         {
+            if (issueNumber <= 0)
+                return GetAllUpgrades();
+
             DateTime date = GetIssueResolvedDate(issueNumber);
             // We need to filter the list of all upgrades to remove any upgrades which are on the same day and
             // fix the same issue.
@@ -136,33 +163,48 @@ namespace APSIM.Builds.Service
             List<Upgrade> upgrades = new List<Upgrade>();
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE Date >= " + string.Format("'{0:yyyy-MM-ddThh:mm:ss tt}'", date) +
+                         "WHERE Date >= @Date" +
                          " ORDER BY Date DESC";
 
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@Date", date.ToString("yyyy-MM-ddTHH:mm:ss"));
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
-                            int buildIssueNumber = (int)reader["IssueNumber"];
-                            bool released = (bool)reader["Released"];
-                            if (buildIssueNumber > 0)
-                            {
-                                if (upgrades.Find(u => u.IssueNumber == buildIssueNumber) == null && released)
-                                {
-                                    Upgrade upgrade = new Upgrade();
-                                    upgrade.ReleaseDate = (DateTime)reader["Date"];
-                                    upgrade.IssueNumber = buildIssueNumber;
-                                    upgrade.IssueTitle = (string)reader["IssueTitle"];
-                                    upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
-                                    upgrade.ReleaseURL = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
-                                    upgrades.Add(upgrade);
-                                }
-                            }
-                        }
+                        return GetUpgrades(reader);
+                    }
+                }
+            }
+        }
+
+        private List<Upgrade> GetAllUpgrades()
+        {
+            using (SqlConnection connection = BuildsClassic.Open())
+                using (SqlCommand command = new SqlCommand("SELECT * FROM ApsimX ORDER BY Date DESC;", connection))
+                    using (SqlDataReader reader = command.ExecuteReader())
+                        return GetUpgrades(reader);
+        }
+
+        private List<Upgrade> GetUpgrades(SqlDataReader reader)
+        {
+            List<Upgrade> upgrades = new List<Upgrade>();
+            while (reader.Read())
+            {
+                int buildIssueNumber = (int)reader["IssueNumber"];
+                bool released = (bool)reader["Released"];
+                if (buildIssueNumber > 0)
+                {
+                    if (upgrades.Find(u => u.IssueNumber == buildIssueNumber) == null && released)
+                    {
+                        Upgrade upgrade = new Upgrade();
+                        upgrade.ReleaseDate = (DateTime)reader["Date"];
+                        upgrade.IssueNumber = buildIssueNumber;
+                        upgrade.IssueTitle = (string)reader["IssueTitle"];
+                        upgrade.IssueURL = @"https://github.com/APSIMInitiative/ApsimX/issues/" + buildIssueNumber;
+                        upgrade.ReleaseURL = @"http://apsimdev.apsim.info/ApsimXFiles/ApsimSetup" + buildIssueNumber + ".exe";
+                        upgrades.Add(upgrade);
                     }
                 }
             }
@@ -180,12 +222,13 @@ namespace APSIM.Builds.Service
             DateTime issueResolvedDate = GetIssueResolvedDate(issueNumber);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber;
+                         "WHERE IssueNumber = @IssueNumber";
 
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@IssueNumber", issueNumber);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -222,12 +265,13 @@ namespace APSIM.Builds.Service
             DateTime resolvedDate = new DateTime(2015, 1, 1);
 
             string sql = "SELECT * FROM ApsimX " +
-                         "WHERE IssueNumber = " + issueNumber +
+                         "WHERE IssueNumber = @IssueNumber " +
                          "ORDER BY Date DESC";
             using (SqlConnection connection = BuildsClassic.Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@IssueNumber", issueNumber);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())

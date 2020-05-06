@@ -28,13 +28,13 @@ namespace APSIM.Builds.Service
         private const string repoName = "APSIMClassic";
 
         /// <summary>Add a new entry to the builds database.</summary>
-        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, string DbConnectPassword)
+        public int Add(string UserName, string Password, string PatchFileName, string Description, int BugID, bool DoCommit, int JenkinsID, int PullID, string DbConnectPassword)
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus, JenkinsID) " +
+                string SQL = "INSERT INTO Classic (UserName, Password, PatchFileName, Description, BugID, DoCommit, Status, StartTime, linuxStatus, JenkinsID, PullRequestID) " +
                              "Output Inserted.ID " +
-                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus, @JenkinsID)";
+                             "VALUES (@UserName, @Password, @PatchFileName, @Description, @BugID, @DoCommit, @Status, @StartTime, @LinuxStatus, @JenkinsID, @PullID)";
 
                 string NowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
 
@@ -51,6 +51,7 @@ namespace APSIM.Builds.Service
                         command.Parameters.Add(new SqlParameter("@LinuxStatus", "Queued"));
                         command.Parameters.Add(new SqlParameter("@StartTime", NowString));
                         command.Parameters.Add(new SqlParameter("@JenkinsID", JenkinsID));
+                        command.Parameters.Add(new SqlParameter("@PullID", PullID));
                         if (DoCommit)
                             command.Parameters.Add(new SqlParameter("@DoCommit", "1"));
                         else
@@ -75,18 +76,19 @@ namespace APSIM.Builds.Service
             int issueId = pull.GetIssueID();
             bool doCommit = false; // Legacy option.
 
-            return Add(author, Password, patchFileName, description, issueId, doCommit, JenkinsID, DbConnectPassword);
+            return Add(author, Password, patchFileName, description, issueId, doCommit, JenkinsID, PullID, DbConnectPassword);
         }
 
         /// <summary>Return details about a specific job.</summary>
         public string GetStatus(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -101,12 +103,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetPatchFileName(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -121,12 +124,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetRevisionNumber(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -141,12 +145,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetUserName(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -163,12 +168,13 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+                string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@JobID", JobID);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
@@ -185,12 +191,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetDescription(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -205,12 +212,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public string GetBugID(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -225,12 +233,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public int GetNumDiffs(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -247,12 +256,13 @@ namespace APSIM.Builds.Service
         /// <summary>Return details about a specific job.</summary>
         public int GetDoCommit(int JobID)
         {
-            string SQL = "SELECT * FROM Classic WHERE ID = " + JobID.ToString();
+            string SQL = "SELECT * FROM Classic WHERE ID = @JobID";
 
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(SQL, connection))
                 {
+                    command.Parameters.AddWithValue("@JobID", JobID);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -269,11 +279,14 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET Status = '" + NewStatus + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET Status = @Status WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Status", NewStatus);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -285,11 +298,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET " + FieldName + " = '" + FieldValue + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET @FieldName = @FieldValue WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@FieldName", FieldName);
+                        command.Parameters.AddWithValue("@FieldValue", FieldValue);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -301,11 +318,14 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET LinuxStatus = '" + NewStatus + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET LinuxStatus = @NewStatus WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@NewStatus", NewStatus);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+                        
                         command.ExecuteNonQuery();
                     }
                 }
@@ -318,12 +338,15 @@ namespace APSIM.Builds.Service
             if (DbConnectPassword == GetValidPassword())
             {
                 string nowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
-                string SQL = "UPDATE Classic SET StartTime = '" + nowString + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET StartTime = @Now WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Now", nowString);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -336,12 +359,15 @@ namespace APSIM.Builds.Service
             if (DbConnectPassword == GetValidPassword())
             {
                 string nowString = DateTime.Now.ToString("yyyy-MM-dd hh:mm tt");
-                string SQL = "UPDATE Classic SET FinishTime = '" + nowString + "' WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET FinishTime = @Now WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@Now", nowString);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -353,12 +379,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET RevisionNumber = " + RevisionNumber.ToString() + " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET RevisionNumber = @RevisionNumber WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@RevisionNumber", RevisionNumber);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -370,15 +399,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET RevisionNumber = @RevisionNumber WHERE pullRequestID = @PullRequestID";
+                string SQL = "SELECT TOP (1) ID FROM Classic WHERE PullRequestID = @PullID ORDER BY ID DESC;";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
-                        command.Parameters.Add(new SqlParameter("@RevisionNumber", revisionNumber));
-                        command.Parameters.Add(new SqlParameter("@PullRequestID", pullRequestID));
-                        command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@PullID", pullRequestID);
+                        int jobID = Convert.ToInt32(command.ExecuteScalar());
+                        UpdateRevisionNumber(jobID, revisionNumber, DbConnectPassword);
                     }
                 }
             }
@@ -389,13 +418,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET DiffsFileName = '" + DiffsFileName + "'" +
-                                                " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET DiffsFileName = @DiffsFileName WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@DiffsFileName", DiffsFileName);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -407,12 +438,15 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET NumDiffs = " + NumDiffs.ToString() + " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET NumDiffs = @NumDiffs WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@NumDiffs", NumDiffs);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -424,13 +458,16 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "UPDATE Classic SET " + FieldName + " = '" + FieldValue + "'" +
-                                                " WHERE ID = " + JobID.ToString();
+                string SQL = "UPDATE Classic SET @FieldName = @FieldValue WHERE ID = @JobID";
 
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@FieldName", FieldName);
+                        command.Parameters.AddWithValue("@FieldValue", FieldValue);
+                        command.Parameters.AddWithValue("@JobID", JobID);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -481,12 +518,11 @@ namespace APSIM.Builds.Service
         public int FindNextLinuxJob()
         {
             int JobID = -1;
+            string sql = "SELECT ID FROM Classic WHERE Status = 'Pass' AND LinuxStatus = 'Queued' ORDER BY ID";
             using (SqlConnection connection = Open())
             {
                 MarkFailedJobs(connection);
-                using (SqlCommand command = new SqlCommand(
-                                                         "SELECT ID FROM Classic WHERE Status = 'Pass' AND LinuxStatus = 'Queued' ORDER BY ID",
-                                                         connection))
+                using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -521,11 +557,13 @@ namespace APSIM.Builds.Service
         {
             if (DbConnectPassword == GetValidPassword())
             {
-                string SQL = "DELETE FROM Classic WHERE ID = " + JobNumber.ToString();
+                string SQL = "DELETE FROM Classic WHERE ID = @JobID";
                 using (SqlConnection connection = Open())
                 {
                     using (SqlCommand command = new SqlCommand(SQL, connection))
                     {
+                        command.Parameters.AddWithValue("@JobID", JobNumber);
+
                         command.ExecuteNonQuery();
                     }
                 }
@@ -546,113 +584,139 @@ namespace APSIM.Builds.Service
                          " FROM Classic " +
                          " ORDER BY ID DESC";
 
-            string filesURL = "https://apsimdev.apsim.info/APSIMClassicFiles/";
-
-            List<BuildJob> buildJobs = new List<BuildJob>();
             using (SqlConnection connection = Open())
             {
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@NumRows", NumRows));
                     using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string baseFileName = Path.GetFileNameWithoutExtension((string)reader["PatchFileName"]);
-
-                            BuildJob buildJob = new BuildJob();
-                            buildJob.ID = (int)reader["ID"];
-                            buildJob.PatchFileName = reader["PatchFileName"]?.ToString();
-                            buildJob.UserName = (string)reader["UserName"];
-                            if (!Convert.IsDBNull(reader["RevisionNumber"]))
-                                buildJob.Revision = (int)reader["RevisionNumber"];
-                            buildJob.StartTime = (DateTime)reader["StartTime"];
-                            buildJob.TaskID = (int)reader["BugID"];
-                            buildJob.Description = reader["Description"].ToString();
-                            buildJob.JenkinsID = (int)reader["JenkinsID"];
-                            buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
-                            buildJob.WindowsStatus = (string)reader["Status"];
-                            // PullRequestID will be null for the old Bob builds. This will be converted to 0.
-                            buildJob.PullRequestID = Convert.ToInt32(reader["PullRequestID"]);
-
-                            if (!Convert.IsDBNull(reader["FinishTime"]))
-                            {
-                                buildJob.Duration = 0;
-                                DateTime finishTime = (DateTime)reader["FinishTime"];
-                                buildJob.Duration = Convert.ToInt32((finishTime - buildJob.StartTime).TotalMinutes);
-                            }
-
-                            if (buildJob.BuiltOnJenkins /*&& buildJob.Revision != 0*/)
-                            {
-                                buildJob.PatchFileURL = filesURL + buildJob.PullRequestID + ".zip";
-                                buildJob.PatchFileNameShort = buildJob.PatchFileName;
-                                buildJob.WindowsDetailsURL = $"http://apsimdev.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
-                                buildJob.XmlUrl = filesURL + buildJob.PullRequestID + ".xml";
-                                buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}";
-                                buildJob.IssueURL = $"https://github.com/APSIMInitiative/APSIMClassic/issues/{buildJob.TaskID}";
-                                buildJob.WindowsBinariesURL = filesURL + buildJob.PullRequestID + ".binaries.zip";
-                                buildJob.WindowsBuildTreeURL = filesURL + buildJob.PullRequestID + ".buildtree.zip";
-                            }
-                            else
-                            {
-                                buildJob.PatchFileURL = filesURL + buildJob.PatchFileName;
-                                buildJob.PatchFileNameShort = GetShortPatchFileName((string)reader["PatchFileName"]);
-                                buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
-                                buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
-                                buildJob.IssueURL = $"http://apsimdev.apsim.info/BugTracker/edit_bug.aspx?id={buildJob.TaskID}";
-                                buildJob.WindowsBinariesURL = filesURL + baseFileName + ".binaries.zip";
-                                buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
-                            }
-
-                            if (!Convert.IsDBNull(reader["NumDiffs"]))
-                                buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];
-
-                            if (buildJob.WindowsNumDiffs > 0)
-                                buildJob.WindowsDiffsURL = filesURL + buildJob.PullRequestID + ".diffs.zip";
-
-							string versionString;
-							if (buildJob.Revision < 3855)
-								versionString = "Apsim7.7-r";
-							else if (buildJob.Revision < 4035)
-								versionString = "Apsim7.8-r";
-							else if (buildJob.Revision < 4133)
-								versionString = "Apsim7.9-r";
-                            else
-                                versionString = "Apsim7.10-r";
-
-                            buildJob.VersionString = versionString + buildJob.Revision;
-
-                            if (buildJob.WindowsNumDiffs == 0 && buildJob.WindowsStatus == "Pass")
-                            {
-                                if (buildJob.BuiltOnJenkins)
-                                {
-                                    buildJob.Win32SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.INTEL.exe";
-                                    buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
-                                    buildJob.WindowsInstallerFullURL = filesURL + buildJob.PatchFileName + ".bootleg.exe";
-                                    buildJob.WindowsInstallerURL = filesURL + buildJob.PatchFileName + ".apsimsetup.exe";
-                                }
-                                else
-                                {
-                                    buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
-                                    buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
-                                    buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe";
-                                    buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
-                                }
-                            }
-
-                            buildJob.LinuxBinariesURL = filesURL + versionString + buildJob.Revision + ".LINUX.X86_64.exe";
-                            buildJob.LinuxDetailsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
-                            buildJob.LinuxDiffsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
-                            if (!Convert.IsDBNull(reader["LinuxNumDiffs"]))
-                                buildJob.LinuxNumDiffs = (int)reader["LinuxNumDiffs"];
-                            buildJob.LinuxStatus = (string)reader["LinuxStatus"];
-
-                            buildJobs.Add(buildJob);
-                        }
-                    }
+                        return GetBuildJobs(reader).ToArray();
                 }
             }
-            return buildJobs.ToArray();
+        }
+
+        /// <summary>Return a list of build jobs which have been released.</summary>
+        /// <param name="numRows">Maximum number of results.</param>
+        public BuildJob[] GetReleases(int numRows)
+        {
+            using (SqlConnection connection = Open())
+            {
+                string sql = "SELECT TOP (@NumRows) * FROM Classic WHERE RevisionNumber IS NOT NULL ORDER BY ID DESC;";
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@NumRows", numRows);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                        return GetBuildJobs(reader).ToArray();
+                }
+            }
+        }
+
+        private IEnumerable<BuildJob> GetBuildJobs(SqlDataReader reader)
+        {
+            string filesURL = "https://apsimdev.apsim.info/APSIMClassicFiles/";
+
+            while (reader.Read())
+            {
+                string baseFileName = Path.GetFileNameWithoutExtension((string)reader["PatchFileName"]);
+
+                BuildJob buildJob = new BuildJob();
+                buildJob.ID = (int)reader["ID"];
+                buildJob.PatchFileName = reader["PatchFileName"]?.ToString();
+                buildJob.UserName = (string)reader["UserName"];
+                if (!Convert.IsDBNull(reader["RevisionNumber"]))
+                    buildJob.Revision = (int)reader["RevisionNumber"];
+                buildJob.StartTime = (DateTime)reader["StartTime"];
+                buildJob.TaskID = (int)reader["BugID"];
+                buildJob.Description = reader["Description"].ToString();
+                buildJob.JenkinsID = (int)reader["JenkinsID"];
+                buildJob.BuiltOnJenkins = buildJob.JenkinsID >= 0;
+                buildJob.WindowsStatus = (string)reader["Status"];
+                // PullRequestID will be null for the old Bob builds.
+                if (!Convert.IsDBNull(reader["PullRequestID"]))
+                    buildJob.PullRequestID = Convert.ToInt32(reader["PullRequestID"]);
+
+                if (!Convert.IsDBNull(reader["FinishTime"]))
+                {
+                    buildJob.Duration = 0;
+                    DateTime finishTime = (DateTime)reader["FinishTime"];
+                    buildJob.Duration = Convert.ToInt32((finishTime - buildJob.StartTime).TotalMinutes);
+                }
+
+                if (buildJob.BuiltOnJenkins /*&& buildJob.Revision != 0*/)
+                {
+                    buildJob.PatchFileURL = filesURL + buildJob.PullRequestID + ".zip";
+                    buildJob.PatchFileNameShort = buildJob.PatchFileName;
+                    buildJob.WindowsDetailsURL = $"http://apsimdev.apsim.info:8080/jenkins/job/PullRequestClassic/{buildJob.JenkinsID}/consoleText";
+                    buildJob.XmlUrl = filesURL + buildJob.PullRequestID + ".xml";
+                    buildJob.PatchFileURL = $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}";
+                    buildJob.IssueURL = $"https://github.com/APSIMInitiative/APSIMClassic/issues/{buildJob.TaskID}";
+                    buildJob.WindowsBinariesURL = filesURL + buildJob.PullRequestID + ".binaries.zip";
+                    buildJob.WindowsBuildTreeURL = filesURL + buildJob.PullRequestID + ".buildtree.zip";
+                }
+                else
+                {
+                    buildJob.PatchFileURL = filesURL + buildJob.PatchFileName;
+                    buildJob.PatchFileNameShort = GetShortPatchFileName((string)reader["PatchFileName"]);
+                    buildJob.WindowsDetailsURL = filesURL + baseFileName + ".txt";
+                    buildJob.XmlUrl = Path.ChangeExtension(buildJob.PatchFileURL, ".xml");
+                    buildJob.IssueURL = $"http://apsimdev.apsim.info/BugTracker/edit_bug.aspx?id={buildJob.TaskID}";
+                    buildJob.WindowsBinariesURL = filesURL + baseFileName + ".binaries.zip";
+                    buildJob.WindowsBuildTreeURL = filesURL + baseFileName + ".buildtree.zip";
+                }
+
+                if (!Convert.IsDBNull(reader["NumDiffs"]))
+                    buildJob.WindowsNumDiffs = (int)reader["NumDiffs"];
+
+                if (buildJob.WindowsNumDiffs > 0)
+                    buildJob.WindowsDiffsURL = filesURL + buildJob.PullRequestID + ".diffs.zip";
+
+                string versionString;
+                if (buildJob.Revision < 3855)
+                    versionString = "Apsim7.7-r";
+                else if (buildJob.Revision < 4035)
+                    versionString = "Apsim7.8-r";
+                else if (buildJob.Revision < 4133)
+                    versionString = "Apsim7.9-r";
+                else
+                    versionString = "Apsim7.10-r";
+
+                buildJob.VersionString = versionString + buildJob.Revision;
+
+                if (buildJob.WindowsNumDiffs == 0 && buildJob.WindowsStatus == "Pass")
+                {
+                    if (buildJob.BuiltOnJenkins)
+                    {
+                        if (buildJob.Revision != 0)
+                        {
+                            // we no longer provide Win32 SFX.
+                            buildJob.Win32SFXURL = null;
+                            buildJob.Win64SFXURL = filesURL + buildJob.PatchFileName + ".binaries.WINDOWS.X86_64.exe";
+                            buildJob.WindowsInstallerFullURL = filesURL + buildJob.PatchFileName + ".bootleg.exe";
+                            buildJob.WindowsInstallerURL = filesURL + buildJob.PatchFileName + ".apsimsetup.exe";
+                        }
+                    }
+                    else
+                    {
+                        buildJob.Win32SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.INTEL.exe";
+                        buildJob.Win64SFXURL = filesURL + versionString + buildJob.Revision + ".binaries.WINDOWS.X86_64.exe";
+                        buildJob.WindowsInstallerFullURL = filesURL + baseFileName + ".bootleg.exe";
+                        buildJob.WindowsInstallerURL = filesURL + baseFileName + ".apsimsetup.exe";
+                    }
+                }
+
+                if (buildJob.LinuxStatus == "Pass")
+                {
+                    buildJob.LinuxBinariesURL = filesURL + versionString + buildJob.Revision + ".LINUX.X86_64.exe";
+                    buildJob.LinuxDetailsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
+                    buildJob.LinuxDiffsURL = filesURL + versionString + buildJob.Revision + ".linux.txt";
+                }
+
+                if (!Convert.IsDBNull(reader["LinuxNumDiffs"]))
+                    buildJob.LinuxNumDiffs = (int)reader["LinuxNumDiffs"];
+                buildJob.LinuxStatus = (string)reader["LinuxStatus"];
+
+                yield return buildJob;
+            }
         }
 
         private string GetShortPatchFileName(string patchFileURL)

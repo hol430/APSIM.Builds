@@ -58,7 +58,7 @@
                     string author = payload.PullRequest.User.Login;
                     if (payload.PullRequest.FixesAnIssue())
                     {
-                        string token = GetJenkinsToken();
+                        string token = GetJenkinsReleaseClassicToken();
                         string sha = payload.PullRequest.MergeCommitSha;
                         string jenkinsUrl = $"http://apsimdev.apsim.info:8080/jenkins/job/ReleaseClassic/buildWithParameters?token={token}&PULL_ID={pullId}&SHA1={sha}";
                         WebUtilities.CallRESTService<object>(jenkinsUrl);
@@ -87,6 +87,12 @@
         {
             return File.ReadAllText(@"D:\Websites\JenkinsToken.txt");
         }
+
+        private string GetJenkinsReleaseClassicToken()
+        {
+            return File.ReadAllText(@"D:\Websites\ReleaseClassic.txt");
+        }
+
         /// <summary>
         /// Get the JSON that GitHub has passed to us.
         /// </summary>
