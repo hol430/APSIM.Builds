@@ -67,9 +67,9 @@ namespace APSIM.Builds.Portal
                 if (buildJob.BuiltOnJenkins)
                 {
                     if (buildJob.Revision > 0)
-                        row["Revision"] = HTMLLink($"#{buildJob.Revision}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                        row["Revision"] = HTMLLink($"{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}.diff");
                     else
-                        row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                        row["Revision"] = HTMLLink($"#{buildJob.PullRequestID}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}.diff");
                 }
                 else if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
