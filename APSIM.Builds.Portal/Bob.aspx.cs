@@ -27,7 +27,7 @@ namespace APSIM.Builds.Portal
             GridView.DataSource = null;
             string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #if DEBUG
-            url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
+            //url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #endif
             BuildJob[] buildJobs = WebUtilities.CallRESTService<BuildJob[]>(url);
 
