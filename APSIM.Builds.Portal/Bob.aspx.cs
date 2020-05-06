@@ -27,7 +27,7 @@ namespace APSIM.Builds.Portal
             GridView.DataSource = null;
             string url = "http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #if DEBUG
-            url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
+            //url = "http://localhost:53063/BuildsClassic.svc/GetJobs?NumRows=" + NumRowsTextBox.Text + "&PassOnly=" + Passes.Checked;
 #endif
             BuildJob[] buildJobs = WebUtilities.CallRESTService<BuildJob[]>(url);
 
@@ -67,9 +67,9 @@ namespace APSIM.Builds.Portal
                 if (buildJob.BuiltOnJenkins)
                 {
                     if (buildJob.Revision > 0)
-                        row["Revision"] = HTMLLink($"#{buildJob.Revision}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                        row["Revision"] = HTMLLink($"{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}.diff");
                     else
-                        row["Revision"] = HTMLLink($"#{buildJob.PatchFileName}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PatchFileName}.diff");
+                        row["Revision"] = HTMLLink($"#{buildJob.PullRequestID}", $"https://github.com/APSIMInitiative/APSIMClassic/pull/{buildJob.PullRequestID}.diff");
                 }
                 else if (buildJob.Revision > 0)
                     row["Revision"] = HTMLLink("R" + buildJob.Revision, "http://apsrunet.apsim.info/websvn/revision.php?repname=apsim&path=%2Ftrunk%2F&rev=" + buildJob.Revision);
