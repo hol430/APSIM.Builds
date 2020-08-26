@@ -15,6 +15,7 @@ namespace APSIM.Builds.Service
     using System.Threading.Tasks;
     using System.Globalization;
     using APSIM.Shared.Web;
+    using System.IO.Compression;
 
     /// <summary>
     /// Web service that provides access to the ApsimX builds system.
@@ -57,6 +58,10 @@ namespace APSIM.Builds.Service
                         command.ExecuteNonQuery();
                     }
                 }
+
+                // Temp hack to workaround the lack of ssh/rsync on the build server for dumb reasons.
+                // It uploads a .zip file which we're expected to extract now...
+                ExtractApsimXDocs();
             }
         }
 
@@ -327,6 +332,21 @@ namespace APSIM.Builds.Service
             }
 
             return null;
+        }
+
+        private void ExtractApsimXDocs()
+        {
+            string pathToArchive = @"D:\Websites\APSIM\apsimx-docs.zip";
+            string pathToSite = @"D:\Websites\APSIM";
+
+            if (File.Exists(pathToArchive))
+            {
+                if (Directory.Exists(pathToSite))
+                    Directory.Delete(pathToSite, true);
+
+                using (ZipArchive archive = ZipFile.Open(pathToArchive, ZipArchiveMode.Read))
+                    archive.ExtractToDirectory(pathToSite);
+            }
         }
 
         /// <summary>
