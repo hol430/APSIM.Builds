@@ -48,8 +48,13 @@
                     string issueTitle = payload.PullRequest.GetIssueTitle("APSIMInitiative", "ApsimX");
                     bool released = payload.PullRequest.FixesAnIssue();
                     string jenkinsUrl = $"http://apsimdev.apsim.info:8080/jenkins/job/CreateInstallation/buildWithParameters?token={token}&ISSUE_NUMBER={issueNumber}&PULL_ID={pullId}&COMMIT_AUTHOR={author}&ISSUE_TITLE={issueTitle}&RELEASED={released}";
-                    WebUtilities.CallRESTService<object>(jenkinsUrl);
-                    ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", author, pullId, payload.PullRequest.Title));
+                    if (released)
+                    {
+                        WebUtilities.CallRESTService<object>(jenkinsUrl);
+                        ShowMessage(string.Format("Triggered a deploy step for {0}'s pull request {1} - {2}", author, pullId, payload.PullRequest.Title));
+                    }
+                    else
+                        ShowMessage($"No release will be generated {author}'s pull request #{pullId} - {payload.PullRequest.Title} as it doesn't resolve an issue");
                 }
                 else if (payload.Repository.Name == "APSIMClassic")
                 {
